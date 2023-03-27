@@ -2,10 +2,11 @@ use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use tokio;
 use uuid::Uuid;
-use wiremock::MockServer;
 
-use pic_scraper_backend::config::{get_configuration, DatabaseSettings};
-use pic_scraper_backend::startup::Application;
+use pic_scraper_backend::config::{get_configuration, DatabaseSettings, BlackList};
+use pic_scraper_backend::etl::extract::create_vec_posts;
+use pic_scraper_backend::etl::save_honkai_posts;
+use pic_scraper_backend::startup::{create_request_client, Application};
 use pic_scraper_backend::telemetry::{get_subscriber, init_subscriber};
 
 // Ensure that the `tracing` stack is only initialised once using `once_cell`
@@ -25,17 +26,15 @@ static TRACING: Lazy<()> = Lazy::new(|| {
 });
 
 pub struct TestApp {
-    pub address: String,
+    pub addr: String,
     pub db_pool: PgPool,
-    pub email_server: MockServer,
     pub port: u16,
     pub api_client: reqwest::Client,
+    pub blacklist: BlackList,
 }
 
 pub async fn spawn_app() -> TestApp {
     Lazy::force(&TRACING);
-
-    let email_server = MockServer::start().await;
 
     let config = {
         let mut c = get_configuration().expect("Failed to read config");
@@ -45,26 +44,24 @@ pub async fn spawn_app() -> TestApp {
         c
     };
 
+    let blacklist = config.app.blacklist.clone();
+
     let db_pool = configure_db(&config.database).await;
 
     let app = Application::build(config).await;
     let port = app.port;
-    let address = format!("http://127.0.0.1:{}", port);
+    let addr = format!("http://127.0.0.1:{}", port);
 
-    let api_client = reqwest::Client::builder()
-        .redirect(reqwest::redirect::Policy::none())
-        .cookie_store(true)
-        .build()
-        .unwrap();
+    let api_client = create_request_client().unwrap();
 
     tokio::spawn(app.run_until_stopped());
 
     let test_app = TestApp {
-        address,
+        addr,
         db_pool,
-        email_server,
         port,
         api_client,
+        blacklist,
     };
     test_app
 }
@@ -96,6 +93,23 @@ pub fn assert_is_redirect_to(response: &reqwest::Response, location: &str) {
 
 #[tokio::test]
 async fn honkai_get_returns_200() {
-    let r = reqwest::get("http://localhost:8000/honkai").await.unwrap();
+    let app = spawn_app().await;
+    let addr = format!("{}/api/honkai", &app.addr);
+    let r = app.api_client.get(&addr).send().await.unwrap();
     assert_eq!(r.status().as_u16(), 200);
+}
+
+#[tokio::test]
+async fn update_returns_200() {
+    let app = spawn_app().await;
+    let addr = format!("{}/api/update", &app.addr);
+    let r = app.api_client.get(&addr).send().await.unwrap();
+    assert_eq!(r.status().as_u16(), 200);
+}
+
+#[tokio::test]
+async fn test_request_and_parse_response() {
+    let app = spawn_app().await;
+    let posts = create_vec_posts(&app.api_client, &app.blacklist).await.unwrap();
+    save_honkai_posts(&app.db_pool, posts).await.unwrap();
 }

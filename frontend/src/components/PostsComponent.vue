@@ -39,9 +39,9 @@ function PixivLink(post) {
 function LofterLink(post) {
     post.post.clipboard_link = post.post.preview_link
 
-    post.post.preview_link = `${process.env.VUE_APP_BACKEND_URL}/lofter?lofter_link=` + post.post.preview_link.slice(0, post.post.preview_link.search("imageView")-1) + "&preview=true"
+    post.post.preview_link = `${import.meta.env.VITE_APP_BACKEND_URL}/jpg?url=` + post.post.preview_link
 
-    post.post.author_profile_image = `${process.env.VUE_APP_BACKEND_URL}/lofter?lofter_link=` + post.post.author_profile_image.slice(0, post.post.author_profile_image.search("imageView")-1)
+    post.post.author_profile_image = `${import.meta.env.VITE_APP_BACKEND_URL}/jpg?url=` + post.post.author_profile_image
 }
 
 const created = computed(() => {

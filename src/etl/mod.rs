@@ -1,7 +1,6 @@
-mod extract;
+pub mod extract;
 mod load;
 mod transform;
 
-pub use extract::*;
-pub use transform::*;
-pub use load::{save_honkai_posts, get_honkai_posts_from_db};
+pub use extract::{fill_db, create_vec_posts};
+pub use load::{save_honkai_posts, load_honkai_posts};

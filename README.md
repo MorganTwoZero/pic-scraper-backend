@@ -2,7 +2,5 @@
 [![CI/CD](https://github.com/MorganTwoZero/zero2prod/actions/workflows/general.yml/badge.svg)](https://github.com/MorganTwoZero/zero2prod/actions/workflows/general.yml)
 # Title
 
-Repo for the "zero2prod w/ rust" book
-
 TODO:
- - SSL to DB
+ - timezone

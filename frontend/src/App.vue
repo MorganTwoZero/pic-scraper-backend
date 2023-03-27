@@ -22,7 +22,7 @@ onBeforeUpdate(() => {
 function update() {
   toast.info("Update requested")
   axios.get('/update').then(response => {
-    toast(response.data.message, {
+    toast(response.data, {
       duration: 1000
     });
   }).catch(error => {

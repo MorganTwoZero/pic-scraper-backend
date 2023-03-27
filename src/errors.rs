@@ -26,6 +26,12 @@ pub enum Error {
     #[error("an error occurred with the database")]
     Sqlx(#[from] sqlx::Error),
 
+    #[error("failed to execute a request to an external API")]
+    Reqwest(#[from] reqwest::Error),
+
+    #[error("failed to parse a response from a source API")]
+    Parsing,
+
     #[error("an internal server error occurred")]
     Anyhow(#[from] anyhow::Error),
 }
@@ -54,7 +60,9 @@ impl Error {
             Self::Forbidden => StatusCode::FORBIDDEN,
             Self::NotFound => StatusCode::NOT_FOUND,
             Self::UnprocessableEntity { .. } => StatusCode::UNPROCESSABLE_ENTITY,
-            Self::Sqlx(_) | Self::Anyhow(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::Sqlx(_) | Self::Anyhow(_) | Self::Reqwest(_) | Self::Parsing => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
         }
     }
 }
@@ -83,9 +91,15 @@ impl IntoResponse for Error {
                 tracing::error!("SQLx error: {:?}", e);
             }
 
+            Self::Reqwest(ref e) => {
+                tracing::error!("Failed to execute a request to an external API: {:?}", e);
+            }
+
             Self::Anyhow(ref e) => {
                 tracing::error!("Generic error: {:?}", e);
             }
+
+            Self::Parsing => tracing::error!("Failed to parse a response from a source API"),
 
             _ => (),
         }

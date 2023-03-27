@@ -3,7 +3,8 @@ CREATE TYPE post_source AS ENUM (
     'mihoyo',
     'pixiv',
     'bcy',
-    'lofter'
+    'lofter',
+    'twitterhome'
 );
 CREATE TABLE honkai_posts(
     post_link TEXT NOT NULL,
@@ -12,7 +13,8 @@ CREATE TABLE honkai_posts(
     created TEXT NOT NULL,
     author TEXT NOT NULL,
     author_link TEXT NOT NULL,
-    author_profile_image TEXT,
-    source post_source,
+    author_profile_image TEXT NULL,
+    source post_source NOT NULL,
+    tags TEXT[] NULL,
     PRIMARY KEY (post_link)
 );
