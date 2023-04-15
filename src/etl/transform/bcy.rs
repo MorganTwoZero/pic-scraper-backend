@@ -36,11 +36,7 @@ impl From<ItemDetail> for Post {
         let created = Utc
             .timestamp_opt(value.ctime.try_into().unwrap(), 0)
             .unwrap()
-            .to_rfc3339()
-            .split_once("+")
-            .unwrap()
-            .0
-            .to_string();
+            .to_rfc3339();
         Self {
             preview_link: value.cover.unwrap(),
             post_link: format!("https://bcy.net/item/detail/{}", value.item_id),
@@ -80,7 +76,7 @@ mod tests {
     use serde_json;
     use std::fs;
 
-    const SAMPLE_JSON_PATH: &str = "tests/test-json/bcy.json";
+    const SAMPLE_JSON_PATH: &str = "tests/assets/json/bcy.json";
 
     #[test]
     fn test_from_bcy_response_to_vec_posts() {

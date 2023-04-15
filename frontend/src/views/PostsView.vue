@@ -19,6 +19,7 @@ import PostsComponent from '@/components/PostsComponent.vue'
 
 let posts = ref([]);
 let page = 1;
+let isLoading = false;
 
 function setLoadingObserver() {
   const loadingObserver = new IntersectionObserver(getPosts);
@@ -26,14 +27,19 @@ function setLoadingObserver() {
 }
 
 function getPosts() {
+  if (isLoading) { return };
+  isLoading = true;
   axios.get(router.currentRoute.value.fullPath + '?page=' + page).then(response => {
     posts.value.push(...response.data);
     page++;
   });
+  isLoading = false;
 }
 
 onMounted(() => {
-  setLoadingObserver()
+  getPosts();
+  setLoadingObserver();
+  setTimeout(() => 100);
 })
 </script>
 

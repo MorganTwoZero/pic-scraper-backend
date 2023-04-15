@@ -42,11 +42,7 @@ impl From<PixivIllust> for Post {
                 0,
             )
             .unwrap()
-            .to_rfc3339()
-            .split_once("+")
-            .unwrap()
-            .0
-            .to_string();
+            .to_rfc3339();
         Self {
             preview_link: value.url,
             post_link: format!("https://www.pixiv.net/en/artworks/{}", value.id),
@@ -84,11 +80,11 @@ mod tests {
     use serde_json;
     use std::fs;
 
-    const SAMPLE_JSON_PATH: &str = "tests/test-json/pixiv.json";
+    const PIXIV_JSON_PATH: &str = "tests/assets/json/pixiv.json";
 
     #[test]
     fn test_from_pixiv_response_to_vec_posts() {
-        let sample_json = fs::read_to_string(SAMPLE_JSON_PATH).expect("Unable to read the file");
+        let sample_json = fs::read_to_string(PIXIV_JSON_PATH).expect("Unable to read the file");
         serde_json::from_str::<PixivResponse>(&sample_json).unwrap();
     }
 }

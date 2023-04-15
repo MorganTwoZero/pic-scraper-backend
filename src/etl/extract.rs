@@ -1,23 +1,26 @@
-use axum::extract::State;
 use reqwest::Client;
 
-use crate::config::BlackList;
+use crate::config::{BlackList, SourcesUrls};
 use crate::etl::load::save_honkai_posts;
 use crate::etl::transform::{
     BcyResponse, DataSource, LofterResponse, MihoyoResponse, MultiUrlDataSource, PixivResponse,
     Post, TwitterHomeResponse, TwitterHonkaiResponse,
 };
-use crate::startup::AppContext;
+use crate::startup::AppState;
 use crate::{Error, Result};
 
-pub async fn create_vec_posts(client: &Client, blacklist: &BlackList) -> Result<Vec<Post>, Error> {
+pub async fn create_vec_posts(
+    client: &Client,
+    blacklist: &BlackList,
+    urls: &SourcesUrls,
+) -> Result<Vec<Post>, Error> {
     let fut_tuple = futures::join!(
-        PixivResponse::request_and_parse(client),
-        TwitterHonkaiResponse::request_and_parse(client),
-        MihoyoResponse::request_and_parse(client),
-        BcyResponse::request_and_parse(client),
-        TwitterHomeResponse::request_and_parse(client),
-        LofterResponse::request_and_parse_multi(client),
+        PixivResponse::request_and_parse(client, &urls.pixiv),
+        TwitterHonkaiResponse::request_and_parse(client, &urls.twitter_honkai),
+        MihoyoResponse::request_and_parse(client, &urls.mihoyo),
+        BcyResponse::request_and_parse(client, &urls.bcy),
+        TwitterHomeResponse::request_and_parse(client, &urls.twitter_home),
+        LofterResponse::request_and_parse_multi(client, LofterResponse::urls(&urls.lofter)),
     );
     Ok(vec![
         fut_tuple.0?,
@@ -33,10 +36,10 @@ pub async fn create_vec_posts(client: &Client, blacklist: &BlackList) -> Result<
     .collect())
 }
 
-pub async fn fill_db(State(ctx): State<AppContext>) -> Result<&'static str> {
-    let posts = create_vec_posts(&ctx.reqwest_client, &ctx.blacklist).await?;
-    save_honkai_posts(&ctx.db_pool, posts).await?;
-    Ok("Updated!")
+pub async fn fill_db(state: &AppState) -> Result<String> {
+    let posts = create_vec_posts(&state.api_client, &state.blacklist, &state.sources_urls).await?;
+    save_honkai_posts(&state.db_pool, posts).await?;
+    Ok(chrono::Utc::now().to_rfc3339())
 }
 
 fn is_in_blacklist(p: &Post, blacklist: &BlackList) -> bool {
@@ -69,7 +72,7 @@ mod tests {
         };
         let blacklist = BlackList {
             authors: vec!["123".to_string()],
-            tags: vec!["Koikatsu".to_string()]
+            tags: vec!["Koikatsu".to_string()],
         };
         assert!(is_in_blacklist(&p, &blacklist));
     }

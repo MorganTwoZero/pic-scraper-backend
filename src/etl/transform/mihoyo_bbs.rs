@@ -42,11 +42,7 @@ impl From<MihoyoPost> for Post {
         let created = Utc
             .timestamp_opt(value.post.created_at.try_into().unwrap(), 0)
             .unwrap()
-            .to_rfc3339()
-            .split_once("+")
-            .unwrap()
-            .0
-            .to_string();
+            .to_rfc3339();
         Self {
             post_link: format!("https://www.miyoushe.com/bh3/article/{}", value.post.post_id),
             preview_link: format!("{}?x-oss-process=image/resize,s_600/quality,q_80/auto-orient,0/interlace,1/format,jpg", value.post.cover.unwrap()),
@@ -88,7 +84,7 @@ mod tests {
     use serde_json;
     use std::fs;
 
-    const SAMPLE_JSON_PATH: &str = "tests/test-json/mihoyo.json";
+    const SAMPLE_JSON_PATH: &str = "tests/assets/json/mihoyo.json";
 
     #[test]
     fn test_from_mihoyo_response_to_vec_posts() {

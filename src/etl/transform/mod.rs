@@ -46,8 +46,8 @@ pub struct Post {
 pub trait DataSource: Into<Vec<Post>> + DeserializeOwned {
     fn url() -> &'static str;
 
-    async fn request_and_parse(client: &Client) -> Result<Vec<Post>, Error> {
-        let response = client.get(Self::url()).send().await?;
+    async fn request_and_parse(client: &Client, url: &str) -> Result<Vec<Post>, Error> {
+        let response = client.get(url).send().await?;
         let parsed = response.json::<Self>().await?.into();
         Ok(parsed)
     }
@@ -55,7 +55,7 @@ pub trait DataSource: Into<Vec<Post>> + DeserializeOwned {
 
 #[async_trait]
 pub trait MultiUrlDataSource: DataSource {
-    fn urls() -> Vec<String>;
+    fn urls(url: &str) -> Vec<String>;
 
-    async fn request_and_parse_multi(client: &Client) -> Result<Vec<Post>, Error>;
+    async fn request_and_parse_multi(client: &Client, urls: Vec<String>) -> Result<Vec<Post>, Error>;
 }

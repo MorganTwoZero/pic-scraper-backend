@@ -10,6 +10,18 @@ pub struct BlackList {
 }
 
 #[derive(serde::Deserialize, Clone)]
+pub struct SourcesUrls {
+    pub pixiv: String,
+    pub pixiv_details: String,
+    pub pixiv_image: String,
+    pub twitter_honkai: String,
+    pub twitter_home: String,
+    pub mihoyo: String,
+    pub bcy: String,
+    pub lofter: String,
+}
+
+#[derive(serde::Deserialize, Clone)]
 pub struct Settings {
     pub database: DatabaseSettings,
     pub app: ApplicationSettings,
@@ -22,6 +34,7 @@ pub struct ApplicationSettings {
     pub host: String,
     pub base_url: String,
     pub blacklist: BlackList,
+    pub sources_urls: SourcesUrls,
 }
 
 #[derive(serde::Deserialize, Clone)]

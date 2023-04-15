@@ -1,26 +1,33 @@
+use axum::body::{Bytes, StreamBody};
 use axum::extract::{Query, State};
-use axum::{headers::ContentType, TypedHeader};
-use bytes::Bytes;
-use serde::Deserialize;
+use futures_util::stream::Stream;
+use reqwest::Client;
 
+use crate::startup::AppState;
 use crate::Error;
-use crate::startup::AppContext;
 
-#[derive(Deserialize, Debug)]
+#[derive(serde::Deserialize)]
 pub struct Url {
-    pub url: String,
+    url: String,
+}
+
+pub async fn proxy_image_route(
+    State(AppState { api_client, .. }): State<AppState>,
+    url: Query<Url>,
+) -> Result<StreamBody<impl Stream<Item = reqwest::Result<Bytes>>>, Error> {
+    let res = if url.url.contains("imageView") {
+        api_client.get(&url.url).header("Referer", "").send().await?.bytes_stream()
+    } else {
+        api_client.get(&url.url).send().await?.bytes_stream()
+    };
+    Ok(StreamBody::new(res))
 }
 
 pub async fn proxy_image(
-    State(ctx): State<AppContext>,
-    url: Query<Url>,
-) -> Result<(TypedHeader<ContentType>, Bytes), Error> {
-    let img = ctx
-        .reqwest_client
-        .get(&url.url)
-        .send()
-        .await?
-        .bytes()
-        .await?;
-    Ok((TypedHeader(ContentType::jpeg()), img))
+    url: &str,
+    client: &Client,
+) -> Result<StreamBody<impl Stream<Item = reqwest::Result<Bytes>>>, Error> {
+    let res = client.get(url).send().await?.bytes_stream();
+    Ok(StreamBody::new(res))
 }
+

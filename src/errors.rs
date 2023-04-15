@@ -32,6 +32,12 @@ pub enum Error {
     #[error("failed to parse a response from a source API")]
     Parsing,
 
+    #[error("failed to parse the PixivId from the URL")]
+    PixivId,
+
+    #[error("failed to create a periodic task")]
+    TaskError(#[from] delay_timer::prelude::TaskError),
+
     #[error("an internal server error occurred")]
     Anyhow(#[from] anyhow::Error),
 }
@@ -59,8 +65,8 @@ impl Error {
             Self::Unauthorized => StatusCode::UNAUTHORIZED,
             Self::Forbidden => StatusCode::FORBIDDEN,
             Self::NotFound => StatusCode::NOT_FOUND,
-            Self::UnprocessableEntity { .. } => StatusCode::UNPROCESSABLE_ENTITY,
-            Self::Sqlx(_) | Self::Anyhow(_) | Self::Reqwest(_) | Self::Parsing => {
+            Self::UnprocessableEntity { .. } | Self::PixivId => StatusCode::UNPROCESSABLE_ENTITY,
+            Self::Sqlx(_) | Self::Anyhow(_) | Self::Reqwest(_) | Self::Parsing | Self::TaskError(_) => {
                 StatusCode::INTERNAL_SERVER_ERROR
             }
         }
@@ -100,6 +106,8 @@ impl IntoResponse for Error {
             }
 
             Self::Parsing => tracing::error!("Failed to parse a response from a source API"),
+
+            Self::PixivId => tracing::error!("Failed to parse a PixivId from the URL"),
 
             _ => (),
         }

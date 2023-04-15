@@ -1,0 +1,90 @@
+use std::fs;
+
+use wiremock::matchers::path;
+use wiremock::{Mock, Request, ResponseTemplate};
+
+use pic_scraper_backend::etl::{Post, fill_db};
+
+use crate::helpers::spawn_app;
+
+#[tokio::test]
+async fn test_update_fills_db() {
+    let app = spawn_app().await;
+
+    let pixiv_json =
+        fs::read_to_string("tests/assets/json/pixiv.json").expect("Unable to read the file");
+    let bcy_json =
+        fs::read_to_string("tests/assets/json/bcy.json").expect("Unable to read the file");
+    let mihoyo_json =
+        fs::read_to_string("tests/assets/json/mihoyo.json").expect("Unable to read the file");
+    let twitter_home_json =
+        fs::read_to_string("tests/assets/json/twitter-home.json").expect("Unable to read the file");
+    let twitter_honkai_json = fs::read_to_string("tests/assets/json/twitter-honkai.json")
+        .expect("Unable to read the file");
+    let lofter_html =
+        fs::read_to_string("tests/assets/json/lofter.htm").expect("Unable to read the file");
+    let _pixiv_mock = Mock::given(path("/pixiv"))
+        .respond_with(ResponseTemplate::new(200).set_body_raw(pixiv_json, "application/json"))
+        .expect(1)
+        .named("pixiv")
+        .mount(&app.mock_server)
+        .await;
+    let _bcy_mock = Mock::given(path("/bcy"))
+        .respond_with(ResponseTemplate::new(200).set_body_raw(bcy_json, "application/json"))
+        .expect(1)
+        .named("bcy")
+        .mount(&app.mock_server)
+        .await;
+    let _mihoyo_mock = Mock::given(path("/mihoyo"))
+        .respond_with(ResponseTemplate::new(200).set_body_raw(mihoyo_json, "application/json"))
+        .expect(1)
+        .named("mihoyo")
+        .mount(&app.mock_server)
+        .await;
+    let _twitter_home_mock = Mock::given(path("/twitter_home"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_raw(twitter_home_json, "application/json"),
+        )
+        .expect(1)
+        .named("twitter_home")
+        .mount(&app.mock_server)
+        .await;
+    let _twitter_honkai_mock = Mock::given(path("/twitter_honkai"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_raw(twitter_honkai_json, "application/json"),
+        )
+        .expect(1)
+        .named("twitter_honkai")
+        .mount(&app.mock_server)
+        .await;
+    let _lofter_mock = Mock::given(|req: &Request| req.url.as_str().contains("lofter"))
+        .respond_with(ResponseTemplate::new(200).set_body_raw(lofter_html, "text/plain"))
+        .expect(7)
+        .named("lofter")
+        .mount(&app.mock_server)
+        .await;
+
+    fill_db(&app.state).await.unwrap();
+
+    let posts = app.state
+        .api_client
+        .get(format!("{}/api/honkai", app.addr))
+        .send()
+        .await
+        .unwrap()
+        .json::<Vec<Post>>()
+        .await
+        .unwrap();
+
+    assert!(posts.len() > 0);
+}
+
+#[tokio::test]
+async fn test_update_runs_on_startup() {
+    todo!();
+}
+
+#[tokio::test]
+async fn test_update_runs_every_20_minutes() {
+    todo!();
+}

@@ -1,5 +1,4 @@
 <template>
-  <NavBar @update="update" />
   <div class="main container">
     <router-view :key="$route.fullPath" />
   </div>
@@ -18,20 +17,6 @@ const store = useStore()
 onBeforeUpdate(() => {
   store.lastUpdateSetter()
 })
-
-function update() {
-  toast.info("Update requested")
-  axios.get('/update').then(response => {
-    toast(response.data, {
-      duration: 1000
-    });
-  }).catch(error => {
-    console.log(error);
-    toast.error(error, {
-      duration: 1000
-    });
-  });
-}
 </script>
 
 <style>

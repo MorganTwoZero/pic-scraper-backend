@@ -51,11 +51,7 @@ impl TryFrom<Tweet> for Post {
         let created = DateTime::parse_from_str(&value.created_at, "%a %b %d %H:%M:%S %z %Y")
             .ok()
             .ok_or(Error::Parsing)?
-            .to_rfc3339()
-            .split_once("+")
-            .ok_or(Error::Parsing)?
-            .0
-            .to_string();
+            .to_rfc3339();
         let main_pic = value
             .entities
             .media
@@ -118,7 +114,7 @@ mod tests {
     use serde_json;
     use std::fs;
 
-    const SAMPLE_JSON_PATH: &str = "tests/test-json/twitter-honkai.json";
+    const SAMPLE_JSON_PATH: &str = "tests/assets/json/twitter-honkai.json";
 
     #[test]
     fn test_from_twitter_response_to_vec_posts() {

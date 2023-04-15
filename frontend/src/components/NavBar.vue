@@ -14,9 +14,6 @@
           <li class="nav-item">
             <router-link @click="refresh" class="nav-link" to="/myfeed">My feed</router-link>
           </li>
-          <li class="nav-item">
-            <a @click="$emit('update')" class="nav-link">Update</a>
-          </li>
           <li class="nav-item nav-link">
             Last update: {{ LastUpdate }}
           </li>

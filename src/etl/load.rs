@@ -3,7 +3,7 @@ use axum::extract::State;
 use axum::Json;
 
 use crate::etl::transform::{Post, PostSource};
-use crate::startup::AppContext;
+use crate::startup::AppState;
 
 pub async fn save_honkai_posts(db_pool: &PgPool, posts: Vec<Post>) -> Result<(), sqlx::Error> {
     for post in posts {
@@ -50,8 +50,8 @@ pub async fn save_honkai_posts(db_pool: &PgPool, posts: Vec<Post>) -> Result<(),
     Ok(())
 }
 
-pub async fn load_honkai_posts(State(ctx): State<AppContext>) -> Json<Vec<Post>> {
-    let db_pool = ctx.db_pool;
+#[tracing::instrument(skip_all)]
+pub async fn load_honkai_posts(State(AppState { db_pool, .. }): State<AppState>) -> Json<Vec<Post>> {
     Json(sqlx::query_as!(
         Post,
         r#"SELECT
@@ -65,7 +65,32 @@ pub async fn load_honkai_posts(State(ctx): State<AppContext>) -> Json<Vec<Post>>
             tags,
             author_profile_image
         FROM honkai_posts
-        ORDER BY created DESC"#
+        WHERE source != 'twitterhome'
+        ORDER BY created DESC
+        LIMIT 20"#
+    )
+    .fetch_all(&db_pool)
+    .await
+    .unwrap())
+}
+
+pub async fn load_twitter_home_posts(State(AppState { db_pool, .. }): State<AppState>) ->  Json<Vec<Post>> {
+    Json(sqlx::query_as!(
+        Post,
+        r#"SELECT
+            post_link,
+            preview_link,
+            images_number,
+            created,
+            author,
+            author_link,
+            source AS "source!: PostSource",
+            tags,
+            author_profile_image
+        FROM honkai_posts
+        WHERE source = 'twitterhome'
+        ORDER BY created DESC
+        LIMIT 20"#
     )
     .fetch_all(&db_pool)
     .await

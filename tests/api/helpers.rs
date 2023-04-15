@@ -1,12 +1,13 @@
+use std::sync::{Arc, Mutex};
+
 use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use tokio;
 use uuid::Uuid;
+use wiremock::MockServer;
 
-use pic_scraper_backend::config::{get_configuration, DatabaseSettings, BlackList};
-use pic_scraper_backend::etl::extract::create_vec_posts;
-use pic_scraper_backend::etl::save_honkai_posts;
-use pic_scraper_backend::startup::{create_request_client, Application};
+use pic_scraper_backend::config::{get_configuration, DatabaseSettings, SourcesUrls};
+use pic_scraper_backend::startup::{Application, AppState};
 use pic_scraper_backend::telemetry::{get_subscriber, init_subscriber};
 
 // Ensure that the `tracing` stack is only initialised once using `once_cell`
@@ -27,43 +28,57 @@ static TRACING: Lazy<()> = Lazy::new(|| {
 
 pub struct TestApp {
     pub addr: String,
-    pub db_pool: PgPool,
     pub port: u16,
-    pub api_client: reqwest::Client,
-    pub blacklist: BlackList,
+    pub mock_server: MockServer,
+    pub state: AppState,
 }
 
 pub async fn spawn_app() -> TestApp {
     Lazy::force(&TRACING);
+
+    let mock_server = MockServer::builder().start().await;
+    let sources_urls = SourcesUrls {
+        pixiv: format!("{}/pixiv", mock_server.uri()),
+        pixiv_details: format!("{}/pixiv_details", mock_server.uri()),
+        pixiv_image: format!("{}/pixiv_image", mock_server.uri()),
+        bcy: format!("{}/bcy", mock_server.uri()),
+        twitter_home: format!("{}/twitter_home", mock_server.uri()),
+        twitter_honkai: format!("{}/twitter_honkai", mock_server.uri()),
+        mihoyo: format!("{}/mihoyo", mock_server.uri()),
+        lofter: format!("{}/lofter", mock_server.uri()),
+    };
 
     let config = {
         let mut c = get_configuration().expect("Failed to read config");
 
         c.database.database_name = Uuid::new_v4().to_string();
         c.app.port = 0;
+        c.app.sources_urls = sources_urls;
         c
     };
 
-    let blacklist = config.app.blacklist.clone();
-
     let db_pool = configure_db(&config.database).await;
 
-    let app = Application::build(config).await;
+    let app = Application::build(config.clone()).await;
     let port = app.port;
     let addr = format!("http://127.0.0.1:{}", port);
 
-    let api_client = create_request_client().unwrap();
+    let state = AppState {
+        db_pool,
+        api_client: Application::create_api_client().expect("Failed to create the api client"),
+        blacklist: config.app.blacklist,
+        sources_urls: config.app.sources_urls,
+        last_update_time: Arc::new(Mutex::new(0)),
+    };
 
     tokio::spawn(app.run_until_stopped());
 
-    let test_app = TestApp {
+    TestApp {
         addr,
-        db_pool,
         port,
-        api_client,
-        blacklist,
-    };
-    test_app
+        mock_server,
+        state,
+    }
 }
 
 async fn configure_db(config: &DatabaseSettings) -> PgPool {
@@ -89,27 +104,4 @@ async fn configure_db(config: &DatabaseSettings) -> PgPool {
 pub fn assert_is_redirect_to(response: &reqwest::Response, location: &str) {
     assert_eq!(response.status().as_u16(), 303);
     assert_eq!(response.headers().get("Location").unwrap(), location);
-}
-
-#[tokio::test]
-async fn honkai_get_returns_200() {
-    let app = spawn_app().await;
-    let addr = format!("{}/api/honkai", &app.addr);
-    let r = app.api_client.get(&addr).send().await.unwrap();
-    assert_eq!(r.status().as_u16(), 200);
-}
-
-#[tokio::test]
-async fn update_returns_200() {
-    let app = spawn_app().await;
-    let addr = format!("{}/api/update", &app.addr);
-    let r = app.api_client.get(&addr).send().await.unwrap();
-    assert_eq!(r.status().as_u16(), 200);
-}
-
-#[tokio::test]
-async fn test_request_and_parse_response() {
-    let app = spawn_app().await;
-    let posts = create_vec_posts(&app.api_client, &app.blacklist).await.unwrap();
-    save_honkai_posts(&app.db_pool, posts).await.unwrap();
 }

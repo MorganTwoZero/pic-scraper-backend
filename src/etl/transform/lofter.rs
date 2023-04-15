@@ -128,7 +128,7 @@ impl DataSource for LofterResponse {
 
 #[async_trait]
 impl MultiUrlDataSource for LofterResponse {
-    fn urls() -> Vec<String> {
+    fn urls(base_url: &str) -> Vec<String> {
         let tags = vec![
             Tag::崩坏3,
             Tag::符华,
@@ -138,14 +138,12 @@ impl MultiUrlDataSource for LofterResponse {
             Tag::崩坏3rd,
             Tag::雷电芽衣,
         ];
-        let base_url = Self::url();
         tags.into_iter()
             .map(|tag| format!("{}{:?}", base_url, tag))
             .collect()
     }
 
-    async fn request_and_parse_multi(client: &Client) -> Result<Vec<Post>, Error> {
-        let urls = Self::urls();
+    async fn request_and_parse_multi(client: &Client, urls: Vec<String>) -> Result<Vec<Post>, Error> {
         let futures = urls.iter().map(|url| fetch_url(&client, url));
         let htmls = join_all(futures).await.into_iter().collect::<Result<Vec<_>, _>>()?;
         let responses = Self(htmls);
@@ -165,7 +163,7 @@ mod tests {
     use super::*;
     use std::fs;
 
-    const SAMPLE_JSON_PATH: &str = "tests/test-json/lofter.htm";
+    const SAMPLE_JSON_PATH: &str = "tests/assets/json/lofter.htm";
 
     #[test]
     fn test_from_lofter_response_to_vec_posts() {
