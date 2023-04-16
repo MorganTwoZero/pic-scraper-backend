@@ -12,7 +12,7 @@ name = "pic-scraper-backend"
 
 [dependencies]
 axum = { version = "0.6.12", features = ["headers"] }
-hyper = "0.14.25"
+hyper = "0.14.26"
 tower-http = { version = "0.4.0", features = ["trace", "fs"] }
 tokio = { version = "1.26.0", features = ["macros", "rt"] }
 config = "0.13.3"
