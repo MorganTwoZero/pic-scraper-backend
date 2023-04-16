@@ -195,12 +195,11 @@ jobs:
 
     - name: Copy docker-compose.yml
       uses: appleboy/scp-action@master
-      env:
+      with:
         HOST: ${{ secrets.HOST }}
         USERNAME: ${{ secrets.USERNAME }}
         KEY: ${{ secrets.SSHKEY }}
-      with:
-        source: "docker-compose.yml, migrations"
+        source: "docker-compose.yml, migrations, config"
         target: "pic-scraper-backend"
 
     - name: Spin up docker compose
