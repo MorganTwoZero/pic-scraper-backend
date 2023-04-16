@@ -1,4 +1,8 @@
 app:
+  headers:
+    cookie: "test"
+    authorization: "test"
+    csrf_token: "test"
   port: 8000
   blacklist:
     tags: ["COM3D2", "mikumikudance", "mmd", "R18MMD", "崩坏3MMD", "コイカツ", "NTR", "動圖", "R-18G", "コイカツ!", "うごイラ", "3D", "koikatsu!", "Koikatsu", "Koikatsu!", "恋活", "3DCG", "MMD", "王者荣耀", "斗破苍穹", "koikatsu"]
