@@ -1,7 +1,15 @@
+use dotenvy::dotenv;
 use secrecy::{ExposeSecret, Secret};
 use serde_aux::field_attributes::deserialize_number_from_string;
 use sqlx::postgres::PgConnectOptions;
 use sqlx::ConnectOptions;
+
+#[derive(serde::Deserialize, Clone, Debug)]
+pub struct ApiClientHeaders {
+    pub cookie: Secret<String>,
+    pub authorization: Secret<String>,
+    pub csrf_token: Secret<String>,
+}
 
 #[derive(serde::Deserialize, Clone)]
 pub struct BlackList {
@@ -32,9 +40,9 @@ pub struct ApplicationSettings {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
     pub host: String,
-    pub base_url: String,
     pub blacklist: BlackList,
     pub sources_urls: SourcesUrls,
+    pub headers: ApiClientHeaders,
 }
 
 #[derive(serde::Deserialize, Clone)]
@@ -61,6 +69,7 @@ impl DatabaseSettings {
 }
 
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {
+    dotenv().ok();
     let base_path = std::env::current_dir().expect("Failed to determine the current directory");
     let configuration_directory = base_path.join("config");
 

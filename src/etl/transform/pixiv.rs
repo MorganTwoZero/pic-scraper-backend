@@ -34,13 +34,7 @@ struct AuthorDetails {
 impl From<PixivIllust> for Post {
     fn from(value: PixivIllust) -> Self {
         let created = Utc
-            .timestamp_opt(
-                value
-                    .upload_timestamp
-                    .try_into()
-                    .expect("Failed to parse timestamp"),
-                0,
-            )
+            .timestamp_opt(value.upload_timestamp, 0)
             .unwrap()
             .to_rfc3339();
         Self {
@@ -59,12 +53,7 @@ impl From<PixivIllust> for Post {
 
 impl From<PixivResponse> for Vec<Post> {
     fn from(value: PixivResponse) -> Self {
-        value
-            .body
-            .illusts
-            .into_iter()
-            .map(|p| Post::from(p))
-            .collect()
+        value.body.illusts.into_iter().map(Post::from).collect()
     }
 }
 

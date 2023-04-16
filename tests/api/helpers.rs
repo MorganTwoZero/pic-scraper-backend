@@ -7,7 +7,7 @@ use uuid::Uuid;
 use wiremock::MockServer;
 
 use pic_scraper_backend::config::{get_configuration, DatabaseSettings, SourcesUrls};
-use pic_scraper_backend::startup::{Application, AppState};
+use pic_scraper_backend::startup::{AppState, Application};
 use pic_scraper_backend::telemetry::{get_subscriber, init_subscriber};
 
 // Ensure that the `tracing` stack is only initialised once using `once_cell`
@@ -65,7 +65,8 @@ pub async fn spawn_app() -> TestApp {
 
     let state = AppState {
         db_pool,
-        api_client: Application::create_api_client().expect("Failed to create the api client"),
+        api_client: Application::create_api_client(&config)
+            .expect("Failed to create the api client"),
         blacklist: config.app.blacklist,
         sources_urls: config.app.sources_urls,
         last_update_time: Arc::new(Mutex::new(0)),

@@ -57,14 +57,11 @@ impl TryFrom<TweetHome> for Post {
         let main_pic = <Vec<Media> as AsRef<[Media]>>::as_ref(media.as_ref())
             .get(0)
             .ok_or(Error::Parsing)?;
-        let tags = match value.entities.hashtags {
-            Some(tags) => Some(
-                tags.into_iter()
-                    .map(|tag| tag.text)
-                    .collect::<Vec<String>>(),
-            ),
-            None => None,
-        };
+        let tags = value.entities.hashtags.map(|tags| {
+            tags.into_iter()
+                .map(|tag| tag.text)
+                .collect::<Vec<String>>()
+        });
         Ok(Self {
             preview_link: main_pic.media_url_https.to_string(),
             post_link: main_pic.expanded_url.replace("/photo/1", ""),

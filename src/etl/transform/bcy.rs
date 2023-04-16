@@ -33,10 +33,7 @@ struct ItemDetail {
 
 impl From<ItemDetail> for Post {
     fn from(value: ItemDetail) -> Self {
-        let created = Utc
-            .timestamp_opt(value.ctime.try_into().unwrap(), 0)
-            .unwrap()
-            .to_rfc3339();
+        let created = Utc.timestamp_opt(value.ctime, 0).unwrap().to_rfc3339();
         Self {
             preview_link: value.cover.unwrap(),
             post_link: format!("https://bcy.net/item/detail/{}", value.item_id),
@@ -82,5 +79,5 @@ mod tests {
     fn test_from_bcy_response_to_vec_posts() {
         let sample_json = fs::read_to_string(SAMPLE_JSON_PATH).expect("Unable to read the file");
         serde_json::from_str::<BcyResponse>(&sample_json).unwrap();
-    }    
+    }
 }

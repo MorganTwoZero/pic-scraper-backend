@@ -1,22 +1,33 @@
-use std::net::TcpListener;
-use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::{
+    net::TcpListener,
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
-use axum::extract::{State, FromRef};
-use axum::{routing::get, Router};
+use axum::{
+    extract::{FromRef, State},
+    routing::get,
+    Router,
+};
 use chrono::{DateTime, Utc};
 use delay_timer::prelude::{DelayTimerBuilder, TaskBuilder};
 use hyper::{header, Server};
 use reqwest::Client;
+use secrecy::ExposeSecret;
 use sqlx::{postgres::PgPoolOptions, PgPool};
-use tower_http::services::{ServeDir, ServeFile};
-use tower_http::trace::TraceLayer;
+use tokio::signal;
+use tower_http::{
+    services::{ServeDir, ServeFile},
+    trace::TraceLayer,
+};
 
-use crate::config::{BlackList, DatabaseSettings, Settings, SourcesUrls};
-use crate::embed::embed;
-use crate::errors::Error;
-use crate::etl::{fill_db, load_honkai_posts, load_twitter_home_posts};
-use crate::utils::proxy_image_route;
+use crate::{
+    config::{BlackList, DatabaseSettings, Settings, SourcesUrls},
+    embed::embed,
+    errors::Error,
+    etl::{fill_db, load_honkai_posts, load_twitter_home_posts},
+    utils::proxy_image_route,
+};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -49,19 +60,41 @@ pub struct Application {
     state: Arc<AppState>,
 }
 
-impl Application {    
+impl Application {
     pub async fn run_until_stopped(self) -> Result<(), hyper::Error> {
         Server::from_tcp(self.listener)
             .expect("Failed to bind a TcpListener")
             .serve(self.router.into_make_service())
+            .with_graceful_shutdown(shutdown_signal())
             .await
     }
 
-    pub fn create_api_client() -> Result<Client, Error> {
-        let headers = vec![...];
+    pub fn create_api_client(config: &Settings) -> Result<Client, Error> {
+        let headers = vec![
+            (
+                "cookie",
+                config.app.headers.cookie.expose_secret().to_owned(),
+            ),
+            ("x-user-id", "37028420".to_owned()),
+            (
+                "authorization",
+                config.app.headers.authorization.expose_secret().to_owned(),
+            ),
+            (
+                "x-csrf-token",
+                config.app.headers.csrf_token.expose_secret().to_owned(),
+            ),
+            (
+                "user-agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0"
+                    .to_owned(),
+            ),
+            ("Referer", "https://www.pixiv.net/".to_owned()),
+        ];
         let mut headers_map = header::HeaderMap::new();
         for (key, val) in headers {
-            let mut val = header::HeaderValue::from_static(val);
+            let mut val = header::HeaderValue::from_str(&val)
+                .unwrap_or_else(|_| panic!("Failed to parse a header: {}", val));
             val.set_sensitive(true);
             headers_map.insert(key, val);
         }
@@ -74,7 +107,7 @@ impl Application {
     pub async fn create_fill_db_task(&self) -> Result<(), Error> {
         let state = self.state.clone();
         let mut task_builder = TaskBuilder::default();
-    
+
         let body = move || {
             let state = state.clone();
             async move {
@@ -83,19 +116,21 @@ impl Application {
                 Ok::<(), Error>(())
             }
         };
-    
+
         let initial_task = task_builder
             .set_task_id(0)
-            .set_frequency_once_by_seconds(2)
+            .set_frequency_once_by_seconds(1)
             .set_maximum_parallel_runnable_num(1)
+            .set_maximum_running_time(30)
             .spawn_async_routine(body.clone());
-    
+
         let task = task_builder
             .set_task_id(1)
             .set_frequency_repeated_by_cron_str("0 */20 * * * *")
             .set_maximum_parallel_runnable_num(1)
+            .set_maximum_running_time(30)
             .spawn_async_routine(body);
-    
+
         let timer = DelayTimerBuilder::default().build();
         timer.insert_task(initial_task?)?;
         timer.insert_task(task?)?;
@@ -109,8 +144,8 @@ impl Application {
     }
 
     async fn create_router(state: StateWrapper) -> Router {
-        let serve_dir =
-            ServeDir::new("frontend").not_found_service(ServeFile::new("frontend/index.html"));
+        let serve_dir = ServeDir::new("frontend/dist/")
+            .not_found_service(ServeFile::new("frontend/dist/index.html"));
 
         Router::new()
             .route("/api/update/last_update", get(last_update))
@@ -141,7 +176,7 @@ impl Application {
 
         let state = Arc::new(AppState {
             db_pool,
-            api_client: Self::create_api_client().expect("Failed to create the api client"),
+            api_client: Self::create_api_client(&config).expect("Failed to create the api client"),
             blacklist: config.app.blacklist,
             sources_urls: config.app.sources_urls,
             last_update_time: Arc::new(Mutex::new(0)),
@@ -152,7 +187,7 @@ impl Application {
             port,
             router,
             listener,
-            state
+            state,
         }
     }
 }
@@ -164,4 +199,30 @@ async fn last_update(State(state): State<AppState>) -> String {
         Utc,
     )
     .to_rfc3339()
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+
+    println!("signal received, starting graceful shutdown");
 }

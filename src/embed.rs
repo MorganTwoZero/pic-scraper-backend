@@ -1,17 +1,20 @@
 use axum::{
     async_trait,
     body::{Bytes, StreamBody},
-    extract::{FromRequestParts, Path, State, TypedHeader},
+    extract::{FromRequestParts, Path, Query, State, TypedHeader},
     headers::UserAgent,
     http::request::Parts,
     response::{IntoResponse, Redirect, Response},
 };
 use futures::Stream;
 use regex::Regex;
-use reqwest::Client;
 use serde_json::Value;
 
-use crate::{config::SourcesUrls, startup::AppState, utils::proxy_image, Error};
+use crate::{
+    startup::AppState,
+    utils::{proxy_image_route, Url},
+    Error,
+};
 
 pub struct PixivId {
     post_id: u32,
@@ -21,7 +24,7 @@ pub struct PixivId {
 impl PixivId {
     fn full(&self) -> String {
         match self.pic_num {
-            Some(num) => format!("{}_p{}", self.post_id, num.to_string()),
+            Some(num) => format!("{}_p{}", self.post_id, num),
             None => self.post_id.to_string(),
         }
     }
@@ -57,18 +60,12 @@ where
 
 pub async fn embed(
     Path(path): Path<String>,
-    State(AppState {
-        api_client,
-        sources_urls,
-        ..
-    }): State<AppState>,
+    State(state): State<AppState>,
     TypedHeader(user_agent): TypedHeader<UserAgent>,
     pixiv_id: PixivId,
 ) -> Result<Response, Error> {
     match path.ends_with(".jpg") {
-        true => Ok(jpg(pixiv_id, &api_client, &sources_urls)
-            .await?
-            .into_response()),
+        true => Ok(jpg(pixiv_id, state).await?.into_response()),
         false => Ok(html(user_agent, pixiv_id).await),
     }
 }
@@ -89,12 +86,11 @@ async fn html(user_agent: UserAgent, pixiv_id: PixivId) -> Response {
 
 async fn jpg(
     pixiv_id: PixivId,
-    api_client: &Client,
-    sources_urls: &SourcesUrls,
+    state: AppState,
 ) -> Result<StreamBody<impl Stream<Item = reqwest::Result<Bytes>>>, Error> {
-    let url = format!("{}{}", sources_urls.pixiv_details, pixiv_id.post_id);
+    let url = format!("{}{}", state.sources_urls.pixiv_details, pixiv_id.post_id);
 
-    let json = api_client.get(&url).send().await?;
+    let json = state.api_client.get(&url).send().await?;
     let post = json.json::<Value>().await?;
     let post = post
         .get("body")
@@ -104,10 +100,10 @@ async fn jpg(
     let img_url = get_img_url(
         post,
         pixiv_id.pic_num.unwrap_or(0),
-        &sources_urls.pixiv_image,
+        &state.sources_urls.pixiv_image,
     )
     .ok_or(anyhow::anyhow!("Failed to deserialize pixiv response"))?;
-    proxy_image(&img_url, &api_client).await
+    proxy_image_route(State(state), Query(Url { url: img_url })).await
 }
 
 fn get_img_url(json: &Value, pic_num: u8, replace_str: &str) -> Option<String> {

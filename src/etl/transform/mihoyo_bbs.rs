@@ -40,7 +40,7 @@ pub struct MihoyoResponse {
 impl From<MihoyoPost> for Post {
     fn from(value: MihoyoPost) -> Self {
         let created = Utc
-            .timestamp_opt(value.post.created_at.try_into().unwrap(), 0)
+            .timestamp_opt(value.post.created_at, 0)
             .unwrap()
             .to_rfc3339();
         Self {
@@ -67,7 +67,7 @@ impl From<MihoyoResponse> for Vec<Post> {
             .list
             .into_iter()
             .filter(|p| p.post.cover.is_some())
-            .map(|p| Post::from(p))
+            .map(Post::from)
             .collect()
     }
 }

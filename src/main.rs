@@ -8,7 +8,10 @@ async fn main() -> anyhow::Result<()> {
     init_subscriber(subscriber);
 
     let config = get_configuration().unwrap();
-    println!("Server running on http://{}:{}", config.app.host, config.app.port);
+    println!(
+        "Server running on http://{}:{}",
+        config.app.host, config.app.port
+    );
     let app = Application::build(config).await;
     app.create_fill_db_task().await.unwrap();
     app.run_until_stopped().await.unwrap();

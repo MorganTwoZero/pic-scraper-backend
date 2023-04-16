@@ -4,5 +4,4 @@
 
 TODO:
  - split functionality into crates
- - move headers values to the config files
- - add tests for periodic "fill db"
+ - opentelemetry?

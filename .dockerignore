@@ -5,6 +5,5 @@ Dockerfile
 docker-compose.yml
 docker-compose.dev.yml
 scripts/
-migrations/
 .github/
 README.md

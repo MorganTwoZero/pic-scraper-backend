@@ -36,6 +36,7 @@ pub async fn create_vec_posts(
     .collect())
 }
 
+#[tracing::instrument(skip_all)]
 pub async fn fill_db(state: &AppState) -> Result<String> {
     let posts = create_vec_posts(&state.api_client, &state.blacklist, &state.sources_urls).await?;
     save_honkai_posts(&state.db_pool, posts).await?;

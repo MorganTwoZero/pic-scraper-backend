@@ -23,13 +23,10 @@ impl From<LofterResponse> for Vec<Post> {
             .into_iter()
             .filter(|html| !html.is_empty())
             .map(|html| Html::parse_document(&html))
-            .map(|fragment| {
+            .flat_map(|fragment| {
                 fragment
                     .select(&post_selector)
-                    .filter(|item| match item.value().attr("data-type") {
-                        Some("2") => true,
-                        _ => false,
-                    })
+                    .filter(|item| matches!(item.value().attr("data-type"), Some("2")))
                     .map(|item| {
                         let pic_num = match item.select(&totalnum_selector).next() {
                             Some(el) => el.inner_html().parse().unwrap_or(1),
@@ -104,7 +101,6 @@ impl From<LofterResponse> for Vec<Post> {
                     })
                     .collect::<Vec<_>>()
             })
-            .flatten()
             .collect()
     }
 }
@@ -143,9 +139,15 @@ impl MultiUrlDataSource for LofterResponse {
             .collect()
     }
 
-    async fn request_and_parse_multi(client: &Client, urls: Vec<String>) -> Result<Vec<Post>, Error> {
-        let futures = urls.iter().map(|url| fetch_url(&client, url));
-        let htmls = join_all(futures).await.into_iter().collect::<Result<Vec<_>, _>>()?;
+    async fn request_and_parse_multi(
+        client: &Client,
+        urls: Vec<String>,
+    ) -> Result<Vec<Post>, Error> {
+        let futures = urls.iter().map(|url| fetch_url(client, url));
+        let htmls = join_all(futures)
+            .await
+            .into_iter()
+            .collect::<Result<Vec<_>, _>>()?;
         let responses = Self(htmls);
         Ok(responses.into())
     }

@@ -66,9 +66,11 @@ impl Error {
             Self::Forbidden => StatusCode::FORBIDDEN,
             Self::NotFound => StatusCode::NOT_FOUND,
             Self::UnprocessableEntity { .. } | Self::PixivId => StatusCode::UNPROCESSABLE_ENTITY,
-            Self::Sqlx(_) | Self::Anyhow(_) | Self::Reqwest(_) | Self::Parsing | Self::TaskError(_) => {
-                StatusCode::INTERNAL_SERVER_ERROR
-            }
+            Self::Sqlx(_)
+            | Self::Anyhow(_)
+            | Self::Reqwest(_)
+            | Self::Parsing
+            | Self::TaskError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }

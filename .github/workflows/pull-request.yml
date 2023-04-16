@@ -18,14 +18,12 @@ jobs:
       postgres:
         image: postgres:15.1-alpine
         env:
-          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: post
         ports:
           - 5432:5432
 
     env:
-      SQLX_VERSION: 0.6.2
+      SQLX_VERSION: 0.6.3
       SQLX_FEATURES: "rustls,postgres"
 
     steps:
@@ -72,14 +70,12 @@ jobs:
       postgres:
         image: postgres:15.1-alpine
         env:
-          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: post
         ports:
           - 5432:5432
 
     env:
-      SQLX_VERSION: 0.6.2
+      SQLX_VERSION: 0.6.3
       SQLX_FEATURES: "rustls,postgres"
 
     steps:

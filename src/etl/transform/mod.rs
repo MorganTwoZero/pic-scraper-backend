@@ -13,13 +13,13 @@ use reqwest::Client;
 pub use twitter_home::TwitterHomeResponse;
 pub use twitter_honkai::TwitterHonkaiResponse;
 
-use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use async_trait::async_trait;
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 use crate::Error;
 
 #[derive(Serialize, Deserialize, sqlx::Type, Debug)]
-#[sqlx(type_name  = "post_source", rename_all = "lowercase")]
+#[sqlx(type_name = "post_source", rename_all = "lowercase")]
 pub enum PostSource {
     Twitter,
     Mihoyo,
@@ -39,7 +39,7 @@ pub struct Post {
     pub post_link: String,
     pub preview_link: String,
     pub source: PostSource,
-    pub tags: Option<Vec<String>>
+    pub tags: Option<Vec<String>>,
 }
 
 #[async_trait]
@@ -57,5 +57,8 @@ pub trait DataSource: Into<Vec<Post>> + DeserializeOwned {
 pub trait MultiUrlDataSource: DataSource {
     fn urls(url: &str) -> Vec<String>;
 
-    async fn request_and_parse_multi(client: &Client, urls: Vec<String>) -> Result<Vec<Post>, Error>;
+    async fn request_and_parse_multi(
+        client: &Client,
+        urls: Vec<String>,
+    ) -> Result<Vec<Post>, Error>;
 }

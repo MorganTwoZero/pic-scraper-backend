@@ -3,7 +3,7 @@ use std::fs;
 use wiremock::matchers::path;
 use wiremock::{Mock, Request, ResponseTemplate};
 
-use pic_scraper_backend::etl::{Post, fill_db};
+use pic_scraper_backend::etl::{fill_db, Post};
 
 use crate::helpers::spawn_app;
 
@@ -66,7 +66,8 @@ async fn test_update_fills_db() {
 
     fill_db(&app.state).await.unwrap();
 
-    let posts = app.state
+    let posts = app
+        .state
         .api_client
         .get(format!("{}/api/honkai", app.addr))
         .send()
@@ -77,14 +78,4 @@ async fn test_update_fills_db() {
         .unwrap();
 
     assert!(posts.len() > 0);
-}
-
-#[tokio::test]
-async fn test_update_runs_on_startup() {
-    todo!();
-}
-
-#[tokio::test]
-async fn test_update_runs_every_20_minutes() {
-    todo!();
 }

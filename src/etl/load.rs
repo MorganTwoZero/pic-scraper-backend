@@ -1,6 +1,6 @@
-use sqlx::PgPool;
 use axum::extract::State;
 use axum::Json;
+use sqlx::PgPool;
 
 use crate::etl::transform::{Post, PostSource};
 use crate::startup::AppState;
@@ -16,7 +16,7 @@ pub async fn save_honkai_posts(db_pool: &PgPool, posts: Vec<Post>) -> Result<(),
             author_link,
             source,
             tags,
-            author_profile_image
+            author_profile_image,
         } = post;
         sqlx::query!(
             r#"
@@ -51,10 +51,13 @@ pub async fn save_honkai_posts(db_pool: &PgPool, posts: Vec<Post>) -> Result<(),
 }
 
 #[tracing::instrument(skip_all)]
-pub async fn load_honkai_posts(State(AppState { db_pool, .. }): State<AppState>) -> Json<Vec<Post>> {
-    Json(sqlx::query_as!(
-        Post,
-        r#"SELECT
+pub async fn load_honkai_posts(
+    State(AppState { db_pool, .. }): State<AppState>,
+) -> Json<Vec<Post>> {
+    Json(
+        sqlx::query_as!(
+            Post,
+            r#"SELECT
             post_link,
             preview_link,
             images_number,
@@ -68,16 +71,20 @@ pub async fn load_honkai_posts(State(AppState { db_pool, .. }): State<AppState>)
         WHERE source != 'twitterhome'
         ORDER BY created DESC
         LIMIT 20"#
+        )
+        .fetch_all(&db_pool)
+        .await
+        .unwrap(),
     )
-    .fetch_all(&db_pool)
-    .await
-    .unwrap())
 }
 
-pub async fn load_twitter_home_posts(State(AppState { db_pool, .. }): State<AppState>) ->  Json<Vec<Post>> {
-    Json(sqlx::query_as!(
-        Post,
-        r#"SELECT
+pub async fn load_twitter_home_posts(
+    State(AppState { db_pool, .. }): State<AppState>,
+) -> Json<Vec<Post>> {
+    Json(
+        sqlx::query_as!(
+            Post,
+            r#"SELECT
             post_link,
             preview_link,
             images_number,
@@ -91,8 +98,9 @@ pub async fn load_twitter_home_posts(State(AppState { db_pool, .. }): State<AppS
         WHERE source = 'twitterhome'
         ORDER BY created DESC
         LIMIT 20"#
+        )
+        .fetch_all(&db_pool)
+        .await
+        .unwrap(),
     )
-    .fetch_all(&db_pool)
-    .await
-    .unwrap())
 }

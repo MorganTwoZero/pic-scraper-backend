@@ -64,14 +64,11 @@ impl TryFrom<Tweet> for Post {
             .rsplit_once("/status/")
             .ok_or(Error::Parsing)?
             .0;
-        let tags = match value.entities.hashtags {
-            Some(tags) => Some(
-                tags.into_iter()
-                    .map(|tag| tag.text)
-                    .collect::<Vec<String>>(),
-            ),
-            None => None,
-        };
+        let tags = value.entities.hashtags.map(|tags| {
+            tags.into_iter()
+                .map(|tag| tag.text)
+                .collect::<Vec<String>>()
+        });
         Ok(Self {
             preview_link: main_pic.media_url_https.to_string(),
             post_link: main_pic.expanded_url.replace("/photo/1", ""),

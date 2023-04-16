@@ -2,26 +2,38 @@ version: '3'
 
 services:
   db:
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_DB: post
-      POSTGRES_PASSWORD: POSTGRES_PASSWORD # is it working now?
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     image: postgres:15.1-alpine
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres -d post'"]
-      interval: 1s
-      timeout: 5s
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres -d postgres'"]
+      interval: 5s
+      timeout: 10s
       retries: 10
+    command: ["postgres", "-c", "log_statement=all"]
 
   web:
     environment:
-      APP_POSTGRES_PASSWORD: POSTGRES_PASSWORD
-    restart: on-failure
+      - VITE_APP_BACKEND_URL="https://pixiv.sbs/api"
+      - APP_database__password=${POSTGRES_PASSWORD}
+      - APP_app__api_client_headers__cookie
+      - APP_app__api_client_headers__authorization
+      - APP_app__api_client_headers__csrf_token
+      - VIRTUAL_HOST=pixiv.sbs,www.pixiv.sbs
+      - VIRTUAL_PORT=8001
+      - LETSENCRYPT_HOST=pixiv.sbs,www.pixiv.sbs
+    restart: unless-stopped
     image: morgan20/pic-scraper-backend
     depends_on: 
       db:
         condition: service_healthy
     ports:
-      - "8000:8000"
+      - 8001:443
+
+networks:
+  default:
+    external:
+      name: net
