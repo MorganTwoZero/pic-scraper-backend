@@ -16,7 +16,7 @@ hyper = "0.14.25"
 tower-http = { version = "0.4.0", features = ["trace", "fs"] }
 tokio = { version = "1.26.0", features = ["macros", "rt"] }
 config = "0.13.3"
-serde = { version = "1.0.158", features = ["derive"] }
+serde = { version = "1.0.160", features = ["derive"] }
 serde-aux = { version = "4.1.2", default-features = false }
 tracing = { version = "0.1.37", features = ["log"] }
 tracing-subscriber = { version = "0.3.16", features = [
