@@ -8,14 +8,14 @@ fi
 if ! [ -x "$(command -v sqlx)" ]; then
 echo >&2 "Error: sqlx is not installed."
 echo >&2 "Use:"
-echo >&2 " cargo install --version=0.6.2 sqlx-cli --no-default-features --features postgres"
+echo >&2 " cargo install --version=0.6.3 sqlx-cli --no-default-features --features postgres"
 echo >&2 "to install it."
 exit 1
 fi
 
 DB_USER=${POSTGRES_USER:=postgres}
 DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
-DB_NAME="${POSTGRES_DB:=post}"
+DB_NAME="${POSTGRES_DB:=postgres}"
 DB_PORT="${POSTGRES_PORT:=5432}"
 
 # Allow to skip Docker if a dockerized Postgres database is already running
@@ -30,7 +30,7 @@ docker run \
 postgres -N 1000
 fi
 export PGPASSWORD="${DB_PASSWORD}"
-until psql -h "localhost" -U "${DB_USER}" -p "${DB_PORT}" -d "post" -c '\q'; do
+until psql -h "localhost" -U "${DB_USER}" -p "${DB_PORT}" -d "${DB_NAME}" -c '\q'; do
 >&2 echo "Postgres is still unavailable - sleeping"
 sleep 1
 done
