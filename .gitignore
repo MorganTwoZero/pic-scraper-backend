@@ -1,3 +1,4 @@
 /target
-*.env
+.env
+!frontend/.env
 postgres-data
