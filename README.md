@@ -2,6 +2,8 @@
 [![CI/CD](https://github.com/MorganTwoZero/pic-scraper-backend/actions/workflows/general.yml/badge.svg)](https://github.com/MorganTwoZero/pic-scraper-backend/actions/workflows/general.yml)
 # Title
 
+docker "latest" tag (i believe) makes "up --build" load old ver during deploy action
+
 TODO:
  - split functionality into crates
  - opentelemetry?

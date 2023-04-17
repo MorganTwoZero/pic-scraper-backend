@@ -210,4 +210,4 @@ jobs:
         KEY: ${{ secrets.SSHKEY }}
         script: |
           cd pic-scraper-backend
-          docker compose up -d
+          docker compose up -d --pull always
