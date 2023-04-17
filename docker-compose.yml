@@ -16,7 +16,6 @@ services:
 
   web:
     environment:
-      - VITE_APP_BACKEND_URL="https://pixiv.sbs/api"
       - RUST_LOG="pic-scraper-backend=debug,tower_http=debug,info"
       - APP_database__password=${POSTGRES_PASSWORD}
       - APP_app__headers__cookie
