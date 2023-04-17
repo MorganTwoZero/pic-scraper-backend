@@ -77,7 +77,7 @@ pub async fn load_honkai_posts(
         WHERE source != 'twitterhome'
         ORDER BY created DESC
         LIMIT 20 OFFSET $1"#,
-            page.page * 20
+            page.page * 20 - 20
         )
         .fetch_all(&db_pool)
         .await
@@ -107,7 +107,7 @@ pub async fn load_twitter_home_posts(
         WHERE source = 'twitterhome'
         ORDER BY created DESC
         LIMIT 20 OFFSET $1"#,
-            page.page * 20
+            page.page * 20 - 20
         )
         .fetch_all(&db_pool)
         .await
