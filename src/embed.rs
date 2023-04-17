@@ -16,6 +16,7 @@ use crate::{
     Error,
 };
 
+#[derive(Debug)]
 pub struct PixivId {
     post_id: u32,
     pic_num: Option<u8>,
@@ -58,6 +59,7 @@ where
     }
 }
 
+#[tracing::instrument(skip(state))]
 pub async fn embed(
     Path(path): Path<String>,
     State(state): State<AppState>,
@@ -82,7 +84,8 @@ async fn html(user_agent: UserAgent, pixiv_id: PixivId) -> Response {
             pixiv_id.full()
         );
         let mut response = html.into_response();
-        response.headers_mut()
+        response
+            .headers_mut()
             .insert(
                 hyper::header::CONTENT_TYPE,
                 hyper::header::HeaderValue::from_static("text/html"),

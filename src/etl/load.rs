@@ -78,6 +78,7 @@ pub async fn load_honkai_posts(
     )
 }
 
+#[tracing::instrument(skip_all)]
 pub async fn load_twitter_home_posts(
     State(AppState { db_pool, .. }): State<AppState>,
 ) -> Json<Vec<Post>> {
