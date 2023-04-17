@@ -15,7 +15,7 @@ import Toast, { POSITION } from "vue-toastification";
 import "vue-toastification/dist/index.css";
 
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = "https://pixiv.sbs/api";  // backend
+axios.defaults.baseURL = import.meta.env.VITE_APP_BACKEND_URL;  // backend
 
 const app = createApp(App)
 
