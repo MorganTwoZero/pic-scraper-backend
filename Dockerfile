@@ -6,6 +6,7 @@ RUN npm install
 
 FROM frontend_builder as frontend
 COPY ./frontend .
+ENV VITE_APP_BACKEND_URL="https://pixiv.sbs/api"
 RUN npm run build
 
 FROM clux/muslrust:stable AS planner
