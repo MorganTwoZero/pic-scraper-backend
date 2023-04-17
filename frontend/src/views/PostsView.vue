@@ -18,7 +18,7 @@ import router from '@/router'
 import PostsComponent from '@/components/PostsComponent.vue'
 
 let posts = ref([]);
-let page = 1;
+let page = 0;
 let isLoading = false;
 
 function setLoadingObserver() {

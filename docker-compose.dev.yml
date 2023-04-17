@@ -17,7 +17,6 @@ services:
   web:
     environment:
       - APP_ENVIRONMENT=local
-      - VITE_APP_BACKEND_URL="http://localhost:8000/api"
       - APP_app__api_client_headers__cookie
       - APP_app__api_client_headers__authorization
       - APP_app__api_client_headers__csrf_token
