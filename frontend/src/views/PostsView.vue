@@ -20,26 +20,47 @@ import PostsComponent from '@/components/PostsComponent.vue'
 let posts = ref([]);
 let page = 0;
 let isLoading = false;
+let nextPage = true;
+let throttleTimeout = null;
 
 function setLoadingObserver() {
-  const loadingObserver = new IntersectionObserver(getPosts);
+  const loadingObserver = new IntersectionObserver(handleObserver);
   loadingObserver.observe(document.querySelector('#loading'))
 }
 
-function getPosts() {
-  if (isLoading) { return };
-  isLoading = true;
-  axios.get(router.currentRoute.value.fullPath + '?page=' + page).then(response => {
-    posts.value.push(...response.data);
-    page++;
-  });
-  isLoading = false;
+async function getPosts() {
+  if (nextPage && !isLoading) {
+    try {
+      isLoading = true;
+      const response = await axios.get(router.currentRoute.value.fullPath + '?page=' + page);
+      if (response.data.length === 0) {
+        nextPage = false;
+      } else {
+        posts.value.push(...response.data);
+        page += 1;
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      isLoading = false;
+    }
+  }
+}
+
+function handleObserver(entries) {
+  if (throttleTimeout) {
+    clearTimeout(throttleTimeout);
+  }
+
+  throttleTimeout = setTimeout(() => {
+    if (entries[0].isIntersecting) {
+      getPosts();
+    }
+  }, 100);
 }
 
 onMounted(() => {
-  getPosts();
   setLoadingObserver();
-  setTimeout(() => 100);
 })
 </script>
 
