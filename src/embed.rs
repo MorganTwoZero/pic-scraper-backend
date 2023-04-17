@@ -77,7 +77,18 @@ async fn html(user_agent: UserAgent, pixiv_id: PixivId) -> Response {
     ];
 
     if DISCORD_HEADERS.contains(&user_agent.as_str()) {
-        format!(r#"<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://pixiv.sbs/en/artworks/{}.jpg">"#, pixiv_id.full()).into_response()
+        let html = format!(
+            r#"<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://pixiv.sbs/en/artworks/{}.jpg">"#,
+            pixiv_id.full()
+        );
+        let mut response = html.into_response();
+        response.headers_mut()
+            .insert(
+                hyper::header::CONTENT_TYPE,
+                hyper::header::HeaderValue::from_static("text/html"),
+            )
+            .unwrap();
+        response
     } else {
         Redirect::to(format!("https://www.pixiv.net/en/artworks/{}", pixiv_id.post_id).as_str())
             .into_response()
