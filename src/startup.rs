@@ -4,12 +4,7 @@ use std::{
     time::Duration,
 };
 
-use axum::{
-    extract::{FromRef, State},
-    routing::get,
-    Router,
-};
-use chrono::{DateTime, Utc};
+use axum::{extract::FromRef, routing::get, Router};
 use delay_timer::prelude::{DelayTimerBuilder, TaskBuilder};
 use hyper::{header, Server};
 use reqwest::Client;
@@ -26,6 +21,7 @@ use crate::{
     embed::embed,
     errors::Error,
     etl::{fill_db, load_honkai_posts, load_twitter_home_posts},
+    site_routes::{last_update, like},
     utils::proxy_image_route,
 };
 
@@ -148,6 +144,7 @@ impl Application {
             .not_found_service(ServeFile::new("frontend/dist/index.html"));
 
         Router::new()
+            .route("/api/like", get(like))
             .route("/api/update/last_update", get(last_update))
             .route("/api/honkai", get(load_honkai_posts))
             .route("/api/myfeed", get(load_twitter_home_posts))
@@ -190,15 +187,6 @@ impl Application {
             state,
         }
     }
-}
-
-async fn last_update(State(state): State<AppState>) -> String {
-    DateTime::<Utc>::from_utc(
-        chrono::NaiveDateTime::from_timestamp_opt(*state.last_update_time.lock().unwrap(), 0)
-            .unwrap(),
-        Utc,
-    )
-    .to_rfc3339()
 }
 
 async fn shutdown_signal() {

@@ -6,11 +6,14 @@ use crate::etl::transform::{Post, PostSource};
 use crate::startup::AppState;
 
 #[derive(serde::Deserialize)]
-pub struct Page {
+pub(crate) struct Page {
     page: i64,
 }
 
-pub async fn save_honkai_posts(db_pool: &PgPool, posts: Vec<Post>) -> Result<(), sqlx::Error> {
+pub(crate) async fn save_honkai_posts(
+    db_pool: &PgPool,
+    posts: Vec<Post>,
+) -> Result<(), sqlx::Error> {
     for post in posts {
         let Post {
             post_link,
@@ -56,7 +59,7 @@ pub async fn save_honkai_posts(db_pool: &PgPool, posts: Vec<Post>) -> Result<(),
 }
 
 #[tracing::instrument(skip_all)]
-pub async fn load_honkai_posts(
+pub(crate) async fn load_honkai_posts(
     State(AppState { db_pool, .. }): State<AppState>,
     page: Query<Page>,
 ) -> Json<Vec<Post>> {
@@ -86,7 +89,7 @@ pub async fn load_honkai_posts(
 }
 
 #[tracing::instrument(skip_all)]
-pub async fn load_twitter_home_posts(
+pub(crate) async fn load_twitter_home_posts(
     State(AppState { db_pool, .. }): State<AppState>,
     page: Query<Page>,
 ) -> Json<Vec<Post>> {

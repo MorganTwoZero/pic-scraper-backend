@@ -7,3 +7,5 @@ docker "latest" tag (i believe) makes "up --build" load old ver during deploy ac
 TODO:
  - split functionality into crates
  - opentelemetry?
+ - like route
+ - races on frontend during posts loading
