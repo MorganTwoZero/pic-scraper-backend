@@ -18,20 +18,24 @@ services:
   web:
     environment:
       - VITE_APP_BACKEND_URL="https://pixiv.sbs/api"
+      - RUST_LOG="pic-scraper-backend=debug,tower_http=debug,info"
       - APP_database__password=${POSTGRES_PASSWORD}
-      - APP_app__api_client_headers__cookie
-      - APP_app__api_client_headers__authorization
-      - APP_app__api_client_headers__csrf_token
+      - APP_app__headers__cookie
+      - APP_app__headers__authorization
+      - APP_app__headers__csrf_token
       - VIRTUAL_HOST=pixiv.sbs,www.pixiv.sbs
-      - VIRTUAL_PORT=8001
+      - VIRTUAL_PORT=8000
       - LETSENCRYPT_HOST=pixiv.sbs,www.pixiv.sbs
     restart: unless-stopped
     image: morgan20/pic-scraper-backend
+    #build: .
+    volumes:
+      - ./config:/home/nonroot/config:ro
     depends_on: 
       db:
         condition: service_healthy
     ports:
-      - 8001:443
+      - 8000:8000
 
 networks:
   default:
