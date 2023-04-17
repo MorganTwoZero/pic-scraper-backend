@@ -107,7 +107,10 @@ impl Application {
         let body = move || {
             let state = state.clone();
             async move {
-                fill_db(&state).await?;
+                match fill_db(&state).await {
+                    Err(e) => tracing::error!("Failed to fill db. Err: {:?}", e),
+                    Ok(_) => tracing::info!("DB filled"),
+                };
                 *state.last_update_time.lock().unwrap() = chrono::Utc::now().timestamp();
                 Ok::<(), Error>(())
             }
