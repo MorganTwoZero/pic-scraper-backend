@@ -69,7 +69,7 @@ async fn test_update_fills_db() {
     let posts = app
         .state
         .api_client
-        .get(format!("{}/api/honkai", app.addr))
+        .get(format!("{}/api/honkai?page=1", app.addr))
         .send()
         .await
         .unwrap()
