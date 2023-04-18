@@ -4,6 +4,7 @@
 
 ## TODO:
  - stage env
+ - stage env in config and frontend
  - split functionality into crates
  - opentelemetry?
  - make embed to work with slash pic num separator

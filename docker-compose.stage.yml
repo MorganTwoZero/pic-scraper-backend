@@ -16,6 +16,7 @@ services:
 
   web:
     environment:
+      - APP_ENVIRONMENT=stage
       - APP_database__password=${POSTGRES_PASSWORD}
       - APP_app__headers__cookie
       - APP_app__headers__authorization
@@ -32,7 +33,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - 8001:8000
+      - 8001:8001
 
 networks:
   default:

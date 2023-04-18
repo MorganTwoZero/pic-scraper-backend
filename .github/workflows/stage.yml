@@ -181,6 +181,7 @@ jobs:
           cache-to: type=gha,mode=max
           push: true
           tags: morgan20/pic-scraper-backend:stage
+          build-args: ["VITE_APP_BACKEND_URL=https://stage.pixiv.sbs/api"]
 
   deploy:
     needs: build

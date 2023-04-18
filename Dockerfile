@@ -6,6 +6,7 @@ RUN npm install
 
 FROM frontend_builder as frontend
 COPY ./frontend .
+ARG VITE_APP_BACKEND_URL
 RUN npm run build
 
 FROM clux/muslrust:stable AS planner
