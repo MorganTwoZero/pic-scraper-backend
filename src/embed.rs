@@ -1,9 +1,9 @@
 use axum::{
     async_trait,
     body::{Bytes, StreamBody},
-    extract::{FromRequestParts, Path, Query, State, TypedHeader},
+    extract::{FromRequestParts, Query, State, TypedHeader},
     headers::UserAgent,
-    http::request::Parts,
+    http::{request::Parts, Uri},
     response::{IntoResponse, Redirect, Response},
 };
 use futures::Stream;
@@ -39,21 +39,27 @@ where
     type Rejection = Error;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
-        let mut url_query = parts
+        let re = Regex::new(r"_p|/").unwrap();
+
+        let url_query = parts
             .uri
             .path()
             .split("en/artworks/")
             .last()
             .ok_or(Error::PixivId)?
-            .trim_end_matches(".jpg")
-            .split("_p");
+            .trim_end_matches(".jpg");
 
-        let post_id = url_query
+        let mut parts = re.split(url_query);
+
+        let post_id = parts
             .next()
             .ok_or(Error::PixivId)?
             .parse()
             .map_err(|_| Error::PixivId)?;
-        let pic_num = url_query.next().and_then(|num| num.parse().ok());
+        let mut pic_num = parts.next().and_then(|num| num.parse().ok());
+        if url_query.contains('/') {
+            pic_num = pic_num.map(|v| v - 1);
+        };
 
         Ok(Self { post_id, pic_num })
     }
@@ -61,12 +67,12 @@ where
 
 #[tracing::instrument(skip(state))]
 pub async fn embed(
-    Path(path): Path<String>,
+    path: Uri,
     State(state): State<AppState>,
     TypedHeader(user_agent): TypedHeader<UserAgent>,
     pixiv_id: PixivId,
 ) -> Result<Response, Error> {
-    match path.ends_with(".jpg") {
+    match path.path().ends_with(".jpg") {
         true => Ok(jpg(pixiv_id, state).await?.into_response()),
         false => Ok(html(user_agent, pixiv_id).await),
     }

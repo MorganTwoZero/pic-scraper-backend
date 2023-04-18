@@ -153,6 +153,7 @@ impl Application {
             .route("/api/myfeed", get(load_twitter_home_posts))
             .route("/api/jpg", get(proxy_image_route))
             .route("/en/artworks/:path", get(embed))
+            .route("/en/artworks/:path/:pic_num", get(embed))
             .nest_service("/", serve_dir.clone())
             .fallback_service(serve_dir)
             // Enables logging. Use `RUST_LOG=tower_http=debug`

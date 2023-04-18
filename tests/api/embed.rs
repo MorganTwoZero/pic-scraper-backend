@@ -105,7 +105,7 @@ async fn test_embed_jpg_single_image() {
 }
 
 #[tokio::test]
-async fn test_embed_jpg_multiple_image() {
+async fn test_embed_jpg_p_separator() {
     let app = spawn_app().await;
     let pixiv_details_json = fs::read_to_string("tests/assets/json/embed-multiple.json")
         .expect("Unable to read the file");
@@ -132,6 +132,43 @@ async fn test_embed_jpg_multiple_image() {
         .state
         .api_client
         .get(format!("{}/en/artworks/106856624_p1.jpg", app.addr))
+        .send()
+        .await
+        .unwrap();
+
+    assert_eq!(response.status().as_u16(), 200);
+    let received_image = response.bytes().await.unwrap().to_vec();
+    assert_eq!(received_image, pixiv_image);
+}
+
+#[tokio::test]
+async fn test_embed_jpg_slash_separator() {
+    let app = spawn_app().await;
+    let pixiv_details_json = fs::read_to_string("tests/assets/json/embed-multiple.json")
+        .expect("Unable to read the file");
+    let pixiv_image =
+        fs::read("tests/assets/test-multiple-image-embed.jpg").expect("Unable to read the file");
+    let _pixiv_details_mock = Mock::given(path("/pixiv_details106856624"))
+        .respond_with(
+            ResponseTemplate::new(200).set_body_raw(pixiv_details_json, "application/json"),
+        )
+        .expect(1)
+        .named("pixiv_details")
+        .mount(&app.mock_server)
+        .await;
+    let _pixiv_image_mock = Mock::given(path(
+        "/pixiv_image/img/2023/04/04/14/54/34/106856624_p1_master1200.jpg",
+    ))
+    .respond_with(ResponseTemplate::new(200).set_body_raw(pixiv_image.clone(), "image/jpeg"))
+    .expect(1)
+    .named("pixiv_image")
+    .mount(&app.mock_server)
+    .await;
+
+    let response = app
+        .state
+        .api_client
+        .get(format!("{}/en/artworks/106856624/2.jpg", app.addr))
         .send()
         .await
         .unwrap();
