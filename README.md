@@ -5,7 +5,7 @@
 ## TODO:
  - split functionality into crates
  - opentelemetry?
- - sort by added
+ - [x] sort by added (kinda. instead i removed "min_fav" constraint in the twitter honkai search query)
  - [x] make embed to work with slash pic num separator
  - [x] stage env
  - [x] stage env in config and frontend
