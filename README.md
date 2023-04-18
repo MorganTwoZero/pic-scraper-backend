@@ -2,10 +2,12 @@
 [![CI/CD](https://github.com/MorganTwoZero/pic-scraper-backend/actions/workflows/general.yml/badge.svg)](https://github.com/MorganTwoZero/pic-scraper-backend/actions/workflows/general.yml)
 # Title
 
-docker "latest" tag (i believe) makes "up --build" load old ver during deploy action
-
-TODO:
+## TODO:
+ - stage env
  - split functionality into crates
  - opentelemetry?
- - like route
- - races on frontend during posts loading
+ - make embed to work with slash pic num separator
+ - sort by added
+ - [x] like route
+ - [x] races on frontend during posts loading
+ - [x] docker "latest" tag (i believe) makes "up --build" load old ver during deploy action (added "--pull always")
