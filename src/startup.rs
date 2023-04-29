@@ -1,20 +1,18 @@
 use std::{
-    net::TcpListener,
+    net::{SocketAddr, TcpListener},
     sync::{Arc, Mutex},
     time::Duration,
 };
 
 use axum::{extract::FromRef, routing::get, Router};
+use axum_tracing_opentelemetry::opentelemetry_tracing_layer;
 use delay_timer::prelude::{DelayTimerBuilder, TaskBuilder};
 use hyper::{header, Server};
 use reqwest::Client;
 use secrecy::ExposeSecret;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tokio::signal;
-use tower_http::{
-    services::{ServeDir, ServeFile},
-    trace::TraceLayer,
-};
+use tower_http::services::{ServeDir, ServeFile};
 
 use crate::{
     config::{BlackList, DatabaseSettings, Settings, SourcesUrls},
@@ -60,7 +58,10 @@ impl Application {
     pub async fn run_until_stopped(self) -> Result<(), hyper::Error> {
         Server::from_tcp(self.listener)
             .expect("Failed to bind a TcpListener")
-            .serve(self.router.into_make_service())
+            .serve(
+                self.router
+                    .into_make_service_with_connect_info::<SocketAddr>(),
+            )
             .with_graceful_shutdown(shutdown_signal())
             .await
     }
@@ -156,8 +157,7 @@ impl Application {
             .route("/en/artworks/:path/:pic_num", get(embed))
             .nest_service("/", serve_dir.clone())
             .fallback_service(serve_dir)
-            // Enables logging. Use `RUST_LOG=tower_http=debug`
-            .layer(TraceLayer::new_for_http())
+            .layer(opentelemetry_tracing_layer())
             .with_state(state)
     }
 
@@ -217,4 +217,6 @@ async fn shutdown_signal() {
     }
 
     println!("signal received, starting graceful shutdown");
+
+    opentelemetry::global::shutdown_tracer_provider();
 }

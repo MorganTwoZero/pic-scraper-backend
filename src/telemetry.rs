@@ -1,49 +1,103 @@
-use tokio::task::JoinHandle;
-use tracing::{subscriber::set_global_default, Subscriber};
-use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
-use tracing_log::LogTracer;
-use tracing_subscriber::{fmt::MakeWriter, layer::SubscriberExt, EnvFilter, Registry};
+use std::str::FromStr;
 
-pub fn spawn_blocking_with_tracing<F, R>(f: F) -> JoinHandle<R>
+use opentelemetry_otlp::WithExportConfig;
+use tracing::Subscriber;
+use tracing_subscriber::{
+    fmt::format::FmtSpan, layer::SubscriberExt, prelude::*, registry::LookupSpan, Layer,
+};
+
+pub fn build_logger_text<S>() -> Box<dyn Layer<S> + Send + Sync + 'static>
 where
-    F: FnOnce() -> R + Send + 'static,
-    R: Send + 'static,
+    S: Subscriber + for<'a> LookupSpan<'a>,
 {
-    let current_span = tracing::Span::current();
-    tokio::task::spawn_blocking(move || current_span.in_scope(f))
+    if cfg!(debug_assertions) {
+        Box::new(
+            tracing_subscriber::fmt::layer()
+                .pretty()
+                .with_line_number(true)
+                .with_thread_names(true)
+                .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+                .with_timer(tracing_subscriber::fmt::time::uptime()),
+        )
+    } else {
+        Box::new(
+            tracing_subscriber::fmt::layer()
+                .json()
+                .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+                .with_timer(tracing_subscriber::fmt::time::uptime()),
+        )
+    }
 }
 
-/// Compose multiple layers into a `tracing`'s subscriber.
-///
-/// # Implementation Notes
-///
-/// We are using `impl Subscriber` as return type to avoid having to
-/// spell out the actual type of the returned subscriber, which is
-/// indeed quite complex.
-/// We need to explicitly call out that the returned subscriber is
-/// `Send` and `Sync` to make it possible to pass it to `init_subscriber`
-/// later on.
-pub fn get_subscriber<Sink>(
-    name: String,
-    env_filter: String,
-    sink: Sink,
-) -> impl Subscriber + Send + Sync
-where
-    Sink: for<'a> MakeWriter<'a> + Send + Sync + 'static,
-{
-    let env_filter =
-        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(env_filter));
-    let formatting_layer = BunyanFormattingLayer::new(name, sink);
-    Registry::default()
-        .with(env_filter)
-        .with(JsonStorageLayer)
-        .with(formatting_layer)
+pub fn setup_telemetry() {
+    let tracer = create_otlp_tracer();
+    let telemetry_layer = tracing_opentelemetry::layer().with_tracer(tracer);
+
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::EnvFilter::from_default_env())
+        .with(build_logger_text())
+        .with(telemetry_layer)
+        .init();
 }
 
-/// Register a subscriber as global default to process span data.
-///
-/// It should only be called once!
-pub fn init_subscriber(subscriber: impl Subscriber + Send + Sync) {
-    LogTracer::init().expect("Failed to set logger");
-    set_global_default(subscriber).expect("Failed to set subscriber");
+fn create_otlp_tracer() -> opentelemetry::sdk::trace::Tracer {
+    let protocol = std::env::var("OTEL_EXPORTER_OTLP_PROTOCOL").unwrap_or("grpc".to_string());
+
+    let mut tracer = opentelemetry_otlp::new_pipeline().tracing();
+    let headers = parse_otlp_headers_from_env();
+
+    match protocol.as_str() {
+        "grpc" => {
+            let mut exporter = opentelemetry_otlp::new_exporter()
+                .tonic()
+                .with_metadata(metadata_from_headers(headers))
+                .with_env();
+
+            // Check if we need TLS
+            if let Ok(endpoint) = std::env::var("OTEL_EXPORTER_OTLP_ENDPOINT") {
+                if endpoint.starts_with("https") {
+                    exporter = exporter.with_tls_config(Default::default());
+                }
+            }
+            tracer = tracer.with_exporter(exporter)
+        }
+        "http/protobuf" => {
+            let exporter = opentelemetry_otlp::new_exporter()
+                .http()
+                .with_headers(headers.into_iter().collect())
+                .with_env();
+            tracer = tracer.with_exporter(exporter)
+        }
+        p => panic!("Unsupported protocol {}", p),
+    };
+
+    tracer.install_batch(opentelemetry::runtime::Tokio).unwrap()
+}
+
+fn metadata_from_headers(headers: Vec<(String, String)>) -> tonic::metadata::MetadataMap {
+    use tonic::metadata;
+
+    let mut metadata = metadata::MetadataMap::new();
+    headers.into_iter().for_each(|(name, value)| {
+        let value = value
+            .parse::<metadata::MetadataValue<metadata::Ascii>>()
+            .expect("Header value invalid");
+        metadata.insert(metadata::MetadataKey::from_str(&name).unwrap(), value);
+    });
+    metadata
+}
+
+fn parse_otlp_headers_from_env() -> Vec<(String, String)> {
+    let mut headers = Vec::new();
+
+    if let Ok(hdrs) = std::env::var("OTEL_EXPORTER_OTLP_HEADERS") {
+        hdrs.split(',')
+            .map(|header| {
+                header
+                    .split_once('=')
+                    .expect("Header should contain '=' character")
+            })
+            .for_each(|(name, value)| headers.push((name.to_owned(), value.to_owned())));
+    }
+    headers
 }

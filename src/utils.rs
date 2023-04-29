@@ -5,11 +5,12 @@ use futures_util::stream::Stream;
 use crate::startup::AppState;
 use crate::Error;
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Debug)]
 pub struct Url {
     pub(crate) url: String,
 }
 
+#[tracing::instrument(skip(api_client))]
 pub async fn proxy_image_route(
     State(AppState { api_client, .. }): State<AppState>,
     url: Query<Url>,
