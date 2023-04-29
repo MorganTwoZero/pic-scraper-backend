@@ -1,19 +1,21 @@
-use axum::extract::{Query, State};
-use axum::Json;
+use axum::{
+    extract::{Query, State},
+    Json,
+};
 use sqlx::PgPool;
 
-use crate::etl::transform::{Post, PostSource};
-use crate::startup::AppState;
+use crate::{
+    etl::transform::{Post, PostSource},
+    startup::AppState,
+    Error,
+};
 
 #[derive(serde::Deserialize)]
 pub(crate) struct Page {
     page: i64,
 }
 
-pub(crate) async fn save_honkai_posts(
-    db_pool: &PgPool,
-    posts: Vec<Post>,
-) -> Result<(), sqlx::Error> {
+pub(crate) async fn save_honkai_posts(db_pool: &PgPool, posts: Vec<Post>) -> Result<(), Error> {
     for post in posts {
         let Post {
             post_link,
@@ -62,8 +64,8 @@ pub(crate) async fn save_honkai_posts(
 pub(crate) async fn load_honkai_posts(
     State(AppState { db_pool, .. }): State<AppState>,
     page: Query<Page>,
-) -> Json<Vec<Post>> {
-    Json(
+) -> Result<Json<Vec<Post>>, Error> {
+    Ok(Json(
         sqlx::query_as!(
             Post,
             r#"SELECT
@@ -83,17 +85,16 @@ pub(crate) async fn load_honkai_posts(
             page.page * 20
         )
         .fetch_all(&db_pool)
-        .await
-        .unwrap(),
-    )
+        .await?,
+    ))
 }
 
 #[tracing::instrument(skip_all)]
 pub(crate) async fn load_twitter_home_posts(
     State(AppState { db_pool, .. }): State<AppState>,
     page: Query<Page>,
-) -> Json<Vec<Post>> {
-    Json(
+) -> Result<Json<Vec<Post>>, Error> {
+    Ok(Json(
         sqlx::query_as!(
             Post,
             r#"SELECT
@@ -113,7 +114,6 @@ pub(crate) async fn load_twitter_home_posts(
             page.page * 20
         )
         .fetch_all(&db_pool)
-        .await
-        .unwrap(),
-    )
+        .await?,
+    ))
 }
