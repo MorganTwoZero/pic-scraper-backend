@@ -13,11 +13,13 @@ FROM clux/muslrust:stable AS planner
 RUN cargo install cargo-chef
 COPY ./Cargo.lock .
 COPY ./Cargo.toml .
+ADD https://github.com/protocolbuffers/protobuf/releases/download/v22.3/protoc-22.3-linux-x86_64.zip ./protoc
 RUN cargo chef prepare --recipe-path recipe.json
 
 FROM clux/muslrust:stable AS cacher
 RUN cargo install cargo-chef
 COPY --from=planner /volume/recipe.json recipe.json
+ADD https://github.com/protocolbuffers/protobuf/releases/download/v22.3/protoc-22.3-linux-x86_64.zip ./protoc
 RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 
 FROM clux/muslrust:stable AS builder

@@ -5,7 +5,6 @@ use std::{
 };
 
 use axum::{extract::FromRef, routing::get, Router};
-use axum_tracing_opentelemetry::opentelemetry_tracing_layer;
 use delay_timer::prelude::{DelayTimerBuilder, TaskBuilder};
 use hyper::{header, Server};
 use reqwest::Client;
@@ -20,6 +19,7 @@ use crate::{
     errors::Error,
     etl::{fill_db, load_honkai_posts, load_twitter_home_posts},
     site_routes::{last_update, like},
+    telemetry::opentelemetry_tracing_layer,
     utils::proxy_image_route,
 };
 
