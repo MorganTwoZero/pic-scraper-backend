@@ -30,7 +30,7 @@ services:
     volumes:
       - ./config:/home/nonroot/config:ro
     depends_on: 
-      db:
+      db-stage:
         condition: service_healthy
     ports:
       - 8001:8001
