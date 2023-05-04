@@ -22,6 +22,8 @@ services:
       - APP_app__api_client_headers__csrf_token
     restart: on-failure
     build: .
+    volumes:
+      - ./config:/home/nonroot/config:ro
     depends_on: 
       db:
         condition: service_healthy

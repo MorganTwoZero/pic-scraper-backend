@@ -1,49 +1,364 @@
-use tokio::task::JoinHandle;
-use tracing::{subscriber::set_global_default, Subscriber};
-use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
-use tracing_log::LogTracer;
-use tracing_subscriber::{fmt::MakeWriter, layer::SubscriberExt, EnvFilter, Registry};
+use std::{borrow::Cow, net::SocketAddr, str::FromStr, time::Duration};
 
-pub fn spawn_blocking_with_tracing<F, R>(f: F) -> JoinHandle<R>
-where
-    F: FnOnce() -> R + Send + 'static,
-    R: Send + 'static,
-{
-    let current_span = tracing::Span::current();
-    tokio::task::spawn_blocking(move || current_span.in_scope(f))
+use axum::{
+    extract::{ConnectInfo, MatchedPath, OriginalUri},
+    http,
+    response::Response,
+};
+use http::{header, uri::Scheme, HeaderMap, Method, Request, Version};
+use opentelemetry::trace::{TraceContextExt, TraceId};
+use opentelemetry_otlp::WithExportConfig;
+use tower_http::{
+    classify::{ServerErrorsAsFailures, ServerErrorsFailureClass, SharedClassifier},
+    trace::{MakeSpan, OnBodyChunk, OnEos, OnFailure, OnRequest, OnResponse, TraceLayer},
+};
+use tracing::Subscriber;
+use tracing::{field::Empty, Span};
+use tracing_subscriber::{
+    fmt::format::FmtSpan, layer::SubscriberExt, prelude::*, registry::LookupSpan, Layer,
+};
+
+#[derive(Clone, Copy, Debug)]
+pub struct OtelMakeSpan;
+
+impl<B> MakeSpan<B> for OtelMakeSpan {
+    fn make_span(&mut self, req: &Request<B>) -> Span {
+        let user_agent = req
+            .headers()
+            .get(header::USER_AGENT)
+            .map_or("", |h| h.to_str().unwrap_or(""));
+
+        let host = req
+            .headers()
+            .get(header::HOST)
+            .map_or("", |h| h.to_str().unwrap_or(""));
+
+        let scheme = req
+            .uri()
+            .scheme()
+            .map_or_else(|| "HTTP".into(), http_scheme);
+
+        let http_route = req
+            .extensions()
+            .get::<MatchedPath>()
+            .map_or("", |mp| mp.as_str())
+            .to_owned();
+
+        let uri = if let Some(uri) = req.extensions().get::<OriginalUri>() {
+            uri.0.clone()
+        } else {
+            req.uri().clone()
+        };
+        let http_target = uri
+            .path_and_query()
+            .map(|path_and_query| path_and_query.to_string())
+            .unwrap_or_else(|| uri.path().to_owned());
+
+        let client_ip = parse_x_forwarded_for(req.headers())
+            .or_else(|| {
+                req.extensions()
+                    .get::<ConnectInfo<SocketAddr>>()
+                    .map(|ConnectInfo(client_ip)| Cow::from(client_ip.to_string()))
+            })
+            .unwrap_or_default();
+        let http_method_v = http_method(req.method());
+        let name = format!("{http_method_v} {http_route}");
+        let (remote_context, trace_id) =
+            create_context_with_trace(extract_remote_context(req.headers()));
+        let span = tracing::info_span!(
+            "HTTP request",
+            otel.name= %name,
+            http.client_ip = %client_ip,
+            http.flavor = %http_flavor(req.version()),
+            http.host = %host,
+            http.method = %http_method_v,
+            http.route = %http_route,
+            http.scheme = %scheme,
+            http.status_code = Empty,
+            http.target = %http_target,
+            http.user_agent = %user_agent,
+            otel.kind = %"server", //opentelemetry::trace::SpanKind::Server
+            otel.status_code = Empty,
+            trace_id = %trace_id,
+        );
+        tracing_opentelemetry::OpenTelemetrySpanExt::set_parent(&span, remote_context);
+        span
+    }
 }
 
-/// Compose multiple layers into a `tracing`'s subscriber.
-///
-/// # Implementation Notes
-///
-/// We are using `impl Subscriber` as return type to avoid having to
-/// spell out the actual type of the returned subscriber, which is
-/// indeed quite complex.
-/// We need to explicitly call out that the returned subscriber is
-/// `Send` and `Sync` to make it possible to pass it to `init_subscriber`
-/// later on.
-pub fn get_subscriber<Sink>(
-    name: String,
-    env_filter: String,
-    sink: Sink,
-) -> impl Subscriber + Send + Sync
-where
-    Sink: for<'a> MakeWriter<'a> + Send + Sync + 'static,
-{
-    let env_filter =
-        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(env_filter));
-    let formatting_layer = BunyanFormattingLayer::new(name, sink);
-    Registry::default()
-        .with(env_filter)
-        .with(JsonStorageLayer)
-        .with(formatting_layer)
+fn parse_x_forwarded_for(headers: &HeaderMap) -> Option<Cow<'_, str>> {
+    let value = headers.get("x-forwarded-for")?;
+    let value = value.to_str().ok()?;
+    let mut ips = value.split(',');
+    Some(ips.next()?.trim().into())
 }
 
-/// Register a subscriber as global default to process span data.
+fn http_method(method: &Method) -> Cow<'static, str> {
+    match method {
+        &Method::CONNECT => "CONNECT".into(),
+        &Method::DELETE => "DELETE".into(),
+        &Method::GET => "GET".into(),
+        &Method::HEAD => "HEAD".into(),
+        &Method::OPTIONS => "OPTIONS".into(),
+        &Method::PATCH => "PATCH".into(),
+        &Method::POST => "POST".into(),
+        &Method::PUT => "PUT".into(),
+        &Method::TRACE => "TRACE".into(),
+        other => other.to_string().into(),
+    }
+}
+
+fn http_flavor(version: Version) -> Cow<'static, str> {
+    match version {
+        Version::HTTP_09 => "0.9".into(),
+        Version::HTTP_10 => "1.0".into(),
+        Version::HTTP_11 => "1.1".into(),
+        Version::HTTP_2 => "2.0".into(),
+        Version::HTTP_3 => "3.0".into(),
+        other => format!("{other:?}").into(),
+    }
+}
+
+fn http_scheme(scheme: &Scheme) -> Cow<'static, str> {
+    if scheme == &Scheme::HTTP {
+        "http".into()
+    } else if scheme == &Scheme::HTTPS {
+        "https".into()
+    } else {
+        scheme.to_string().into()
+    }
+}
+
+// If remote request has no span data the propagator defaults to an unsampled context
+fn extract_remote_context(headers: &http::HeaderMap) -> opentelemetry::Context {
+    struct HeaderExtractor<'a>(&'a http::HeaderMap);
+
+    impl<'a> opentelemetry::propagation::Extractor for HeaderExtractor<'a> {
+        fn get(&self, key: &str) -> Option<&str> {
+            self.0.get(key).and_then(|value| value.to_str().ok())
+        }
+
+        fn keys(&self) -> Vec<&str> {
+            self.0.keys().map(|value| value.as_str()).collect()
+        }
+    }
+    let extractor = HeaderExtractor(headers);
+    opentelemetry::global::get_text_map_propagator(|propagator| propagator.extract(&extractor))
+}
+
+//HACK create a context with a trace_id (if not set) before call to
+// `tracing_opentelemetry::OpenTelemetrySpanExt::set_parent`
+// else trace_id is defined too late and the `info_span` log `trace_id: ""`
+// Use the default global tracer (named "") to start the trace
+fn create_context_with_trace(
+    remote_context: opentelemetry::Context,
+) -> (opentelemetry::Context, TraceId) {
+    if !remote_context.span().span_context().is_valid() {
+        // create a fake remote context but with a fresh new trace_id
+        use opentelemetry::sdk::trace::IdGenerator;
+        use opentelemetry::sdk::trace::RandomIdGenerator;
+        use opentelemetry::trace::{SpanContext, SpanId};
+        let trace_id = RandomIdGenerator::default().new_trace_id();
+        let new_span_context = SpanContext::new(
+            trace_id,
+            SpanId::INVALID,
+            remote_context.span().span_context().trace_flags(),
+            false,
+            remote_context.span().span_context().trace_state().clone(),
+        );
+        (
+            remote_context.with_remote_span_context(new_span_context),
+            trace_id,
+        )
+    } else {
+        let remote_span = remote_context.span();
+        let span_context = remote_span.span_context();
+        let trace_id = span_context.trace_id();
+        (remote_context, trace_id)
+    }
+}
+
+/// Callback that [`Trace`] will call when it receives a request.
 ///
-/// It should only be called once!
-pub fn init_subscriber(subscriber: impl Subscriber + Send + Sync) {
-    LogTracer::init().expect("Failed to set logger");
-    set_global_default(subscriber).expect("Failed to set subscriber");
+/// [`Trace`]: tower_http::trace::Trace
+#[derive(Clone, Copy, Debug)]
+pub struct OtelOnRequest;
+
+impl<B> OnRequest<B> for OtelOnRequest {
+    #[inline]
+    fn on_request(&mut self, _request: &Request<B>, _span: &Span) {}
+}
+
+/// Callback that [`Trace`] will call when it receives a response.
+///
+/// [`Trace`]: tower_http::trace::Trace
+#[derive(Clone, Copy, Debug)]
+pub struct OtelOnResponse;
+
+impl<B> OnResponse<B> for OtelOnResponse {
+    fn on_response(self, response: &Response<B>, _latency: Duration, span: &Span) {
+        let status = response.status().as_u16().to_string();
+        span.record("http.status_code", &tracing::field::display(status));
+
+        // assume there is no error, if there is `OtelOnFailure` will be called and override this
+        span.record("otel.status_code", "OK");
+    }
+}
+
+/// Callback that [`Trace`] will call when the response body produces a chunk.
+///
+/// [`Trace`]: tower_http::trace::Trace
+#[derive(Clone, Copy, Debug)]
+pub struct OtelOnBodyChunk;
+
+impl<B> OnBodyChunk<B> for OtelOnBodyChunk {
+    #[inline]
+    fn on_body_chunk(&mut self, _chunk: &B, _latency: Duration, _span: &Span) {}
+}
+
+/// Callback that [`Trace`] will call when a streaming response completes.
+///
+/// [`Trace`]: tower_http::trace::Trace
+#[derive(Clone, Copy, Debug)]
+pub struct OtelOnEos;
+
+impl OnEos for OtelOnEos {
+    #[inline]
+    fn on_eos(self, _trailers: Option<&http::HeaderMap>, _stream_duration: Duration, _span: &Span) {
+    }
+}
+
+/// Callback that [`Trace`] will call when a response or end-of-stream is classified as a failure.
+///
+/// [`Trace`]: tower_http::trace::Trace
+#[derive(Clone, Copy, Debug)]
+pub struct OtelOnFailure;
+
+impl OnFailure<ServerErrorsFailureClass> for OtelOnFailure {
+    fn on_failure(&mut self, failure: ServerErrorsFailureClass, _latency: Duration, span: &Span) {
+        match failure {
+            ServerErrorsFailureClass::StatusCode(status) => {
+                if status.is_server_error() {
+                    span.record("otel.status_code", "ERROR");
+                }
+            }
+            ServerErrorsFailureClass::Error(_) => {
+                span.record("otel.status_code", "ERROR");
+            }
+        }
+    }
+}
+
+pub fn opentelemetry_tracing_layer() -> TraceLayer<
+    SharedClassifier<ServerErrorsAsFailures>,
+    OtelMakeSpan,
+    OtelOnRequest,
+    OtelOnResponse,
+    OtelOnBodyChunk,
+    OtelOnEos,
+    OtelOnFailure,
+> {
+    TraceLayer::new_for_http()
+        .make_span_with(OtelMakeSpan)
+        .on_request(OtelOnRequest)
+        .on_response(OtelOnResponse)
+        .on_body_chunk(OtelOnBodyChunk)
+        .on_eos(OtelOnEos)
+        .on_failure(OtelOnFailure)
+}
+
+pub fn build_logger_text<S>() -> Box<dyn Layer<S> + Send + Sync + 'static>
+where
+    S: Subscriber + for<'a> LookupSpan<'a>,
+{
+    if cfg!(debug_assertions) {
+        Box::new(
+            tracing_subscriber::fmt::layer()
+                .pretty()
+                .with_line_number(true)
+                .with_thread_names(true)
+                .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+                .with_timer(tracing_subscriber::fmt::time::uptime()),
+        )
+    } else {
+        Box::new(
+            tracing_subscriber::fmt::layer()
+                .json()
+                .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+                .with_timer(tracing_subscriber::fmt::time::uptime()),
+        )
+    }
+}
+
+pub fn setup_telemetry() {
+    let tracer = create_otlp_tracer();
+    let telemetry_layer = tracing_opentelemetry::layer().with_tracer(tracer);
+
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::EnvFilter::from_default_env())
+        .with(build_logger_text())
+        .with(telemetry_layer)
+        .init();
+}
+
+fn create_otlp_tracer() -> opentelemetry::sdk::trace::Tracer {
+    let protocol = std::env::var("OTEL_EXPORTER_OTLP_PROTOCOL").unwrap_or("grpc".to_string());
+
+    let mut tracer = opentelemetry_otlp::new_pipeline().tracing();
+    let headers = parse_otlp_headers_from_env();
+
+    match protocol.as_str() {
+        "grpc" => {
+            let mut exporter = opentelemetry_otlp::new_exporter()
+                .tonic()
+                .with_metadata(metadata_from_headers(headers))
+                .with_env();
+
+            // Check if we need TLS
+            if let Ok(endpoint) = std::env::var("OTEL_EXPORTER_OTLP_ENDPOINT") {
+                if endpoint.starts_with("https") {
+                    exporter = exporter.with_tls_config(Default::default());
+                }
+            }
+            tracer = tracer.with_exporter(exporter)
+        }
+        "http/protobuf" => {
+            let exporter = opentelemetry_otlp::new_exporter()
+                .http()
+                .with_headers(headers.into_iter().collect())
+                .with_env();
+            tracer = tracer.with_exporter(exporter)
+        }
+        p => panic!("Unsupported protocol {}", p),
+    };
+
+    tracer.install_batch(opentelemetry::runtime::Tokio).unwrap()
+}
+
+fn metadata_from_headers(headers: Vec<(String, String)>) -> tonic::metadata::MetadataMap {
+    use tonic::metadata;
+
+    let mut metadata = metadata::MetadataMap::new();
+    headers.into_iter().for_each(|(name, value)| {
+        let value = value
+            .parse::<metadata::MetadataValue<metadata::Ascii>>()
+            .expect("Header value invalid");
+        metadata.insert(metadata::MetadataKey::from_str(&name).unwrap(), value);
+    });
+    metadata
+}
+
+fn parse_otlp_headers_from_env() -> Vec<(String, String)> {
+    let mut headers = Vec::new();
+
+    if let Ok(hdrs) = std::env::var("OTEL_EXPORTER_OTLP_HEADERS") {
+        hdrs.split(',')
+            .map(|header| {
+                header
+                    .split_once('=')
+                    .expect("Header should contain '=' character")
+            })
+            .for_each(|(name, value)| headers.push((name.to_owned(), value.to_owned())));
+    }
+    headers
 }

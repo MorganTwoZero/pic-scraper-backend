@@ -1,4 +1,4 @@
-use dotenvy::dotenv;
+use dotenvy::dotenv_override;
 use secrecy::{ExposeSecret, Secret};
 use serde_aux::field_attributes::deserialize_number_from_string;
 use sqlx::postgres::PgConnectOptions;
@@ -69,7 +69,7 @@ impl DatabaseSettings {
 }
 
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {
-    dotenv().ok();
+    dotenv_override().ok();
     let base_path = std::env::current_dir().expect("Failed to determine the current directory");
     let configuration_directory = base_path.join("config");
 

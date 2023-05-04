@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  db:
+  db-stage:
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -18,19 +18,28 @@ services:
     environment:
       - APP_ENVIRONMENT=stage
       - APP_database__password=${POSTGRES_PASSWORD}
+
       - APP_app__headers__cookie
       - APP_app__headers__authorization
       - APP_app__headers__csrf_token
+
       - VIRTUAL_HOST=stage.pixiv.sbs,www-stage.pixiv.sbs
       - VIRTUAL_PORT=8001
       - LETSENCRYPT_HOST=stage.pixiv.sbs,www-stage.pixiv.sbs
+
+      - RUST_LOG
+      - OTEL_EXPORTER_OTLP_ENDPOINT
+      - OTEL_EXPORTER_OTLP_HEADERS
+      - OTEL_SERVICE_NAME
+      - OTEL_TRACES_SAMPLER
+      
     restart: unless-stopped
     image: morgan20/pic-scraper-backend:stage
     #build: .
     volumes:
       - ./config:/home/nonroot/config:ro
     depends_on: 
-      db:
+      db-stage:
         condition: service_healthy
     ports:
       - 8001:8001
