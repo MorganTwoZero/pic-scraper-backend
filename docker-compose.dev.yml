@@ -2,6 +2,7 @@ version: '3'
 
 services:
   db:
+    restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: password
     image: postgres:15.1-alpine
@@ -20,7 +21,6 @@ services:
       - APP_app__api_client_headers__cookie
       - APP_app__api_client_headers__authorization
       - APP_app__api_client_headers__csrf_token
-    restart: on-failure
     build: .
     volumes:
       - ./config:/home/nonroot/config:ro
