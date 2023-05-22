@@ -3135,7 +3135,7 @@ dependencies = [
 [[package]]
 name = "tracing-opentelemetry"
 version = "0.19.0"
-source = "git+https://github.com/jaysonsantos/tracing-opentelemetry.git?branch=update-opentelemetry-0.19#76b0a0fe45fd53c352e8bfdcdfad775aed727e4c"
+source = "git+https://github.com/jaysonsantos/tracing-opentelemetry.git?branch=update-opentelemetry-0.19#78ea8f663f90817ad6ff7d0945cd0cb9df3e040b"
 dependencies = [
  "once_cell",
  "opentelemetry",
