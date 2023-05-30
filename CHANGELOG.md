@@ -1,6 +1,6 @@
 # Changelog
 
-## 2023-05-09 18:55 UTC
+## 2023-05-30 09:04 UTC
 
 ### Bug Fixes
 
@@ -21,6 +21,7 @@
 - Bump deps ([994d5dd](994d5dd2f3debcef40edc18c0ea454ed37ce1d6b))
 - Exclude files under tests/assets/ from language statistics ([3c69c70](3c69c70483d5392de121053c0402502ad180244b))
 - Add more goals to TODO ([8559b65](8559b652a65903201b6a551607fc7c08f079539d))
+- Setup git-cliff ([cf46cd7](cf46cd76418278ac8c973b4d4de1108f7fd15011))
 
 ### Build
 
