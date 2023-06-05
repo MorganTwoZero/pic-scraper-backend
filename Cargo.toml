@@ -55,7 +55,7 @@ default-features = false
 features = ["runtime-actix-rustls", "macros", "postgres", "migrate", "offline"]
 
 [dev-dependencies]
-once_cell = "1.17.2"
+once_cell = "1.18.0"
 wiremock = "0.5.18"
 
 
