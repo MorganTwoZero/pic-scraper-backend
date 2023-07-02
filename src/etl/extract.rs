@@ -4,7 +4,7 @@ use crate::config::{BlackList, SourcesUrls};
 use crate::etl::load::save_honkai_posts;
 use crate::etl::transform::{
     BcyResponse, DataSource, LofterResponse, MihoyoResponse, MultiUrlDataSource, PixivResponse,
-    Post, TwitterHomeResponse, TwitterHonkaiResponse,
+    Post, TwitterHomeResponse, /* TwitterHonkaiResponse, */
 };
 use crate::startup::AppState;
 use crate::{Error, Result};
@@ -16,7 +16,7 @@ pub async fn create_vec_posts(
 ) -> Result<Vec<Post>, Error> {
     let fut_tuple = futures::join!(
         PixivResponse::request_and_parse(client, &urls.pixiv),
-        TwitterHonkaiResponse::request_and_parse(client, &urls.twitter_honkai),
+        //TwitterHonkaiResponse::request_and_parse(client, &urls.twitter_honkai),
         MihoyoResponse::request_and_parse(client, &urls.mihoyo),
         BcyResponse::request_and_parse(client, &urls.bcy),
         TwitterHomeResponse::request_and_parse(client, &urls.twitter_home),
@@ -28,7 +28,7 @@ pub async fn create_vec_posts(
         fut_tuple.2?,
         fut_tuple.3?,
         fut_tuple.4?,
-        fut_tuple.5?,
+        //fut_tuple.5?,
     ]
     .into_iter()
     .flatten()

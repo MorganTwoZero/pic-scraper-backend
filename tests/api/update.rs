@@ -19,8 +19,8 @@ async fn test_update_fills_db() {
         fs::read_to_string("tests/assets/json/mihoyo.json").expect("Unable to read the file");
     let twitter_home_json =
         fs::read_to_string("tests/assets/json/twitter-home.json").expect("Unable to read the file");
-    let twitter_honkai_json = fs::read_to_string("tests/assets/json/twitter-honkai.json")
-        .expect("Unable to read the file");
+    // let twitter_honkai_json = fs::read_to_string("tests/assets/json/twitter-honkai.json")
+    //     .expect("Unable to read the file");
     let lofter_html =
         fs::read_to_string("tests/assets/json/lofter.htm").expect("Unable to read the file");
     let _pixiv_mock = Mock::given(path("/pixiv"))
@@ -49,14 +49,14 @@ async fn test_update_fills_db() {
         .named("twitter_home")
         .mount(&app.mock_server)
         .await;
-    let _twitter_honkai_mock = Mock::given(path("/twitter_honkai"))
-        .respond_with(
-            ResponseTemplate::new(200).set_body_raw(twitter_honkai_json, "application/json"),
-        )
-        .expect(1)
-        .named("twitter_honkai")
-        .mount(&app.mock_server)
-        .await;
+    // let _twitter_honkai_mock = Mock::given(path("/twitter_honkai"))
+    //     .respond_with(
+    //         ResponseTemplate::new(200).set_body_raw(twitter_honkai_json, "application/json"),
+    //     )
+    //     .expect(1)
+    //     .named("twitter_honkai")
+    //     .mount(&app.mock_server)
+    //     .await;
     let _lofter_mock = Mock::given(|req: &Request| req.url.as_str().contains("lofter"))
         .respond_with(ResponseTemplate::new(200).set_body_raw(lofter_html, "text/plain"))
         .expect(7)
