@@ -1,6 +1,6 @@
 # Changelog
 
-## 2023-07-03 18:25 UTC
+## 2023-07-03 20:56 UTC
 
 ### Bug Fixes
 
@@ -12,6 +12,7 @@
 - Add otel envs to the compose file ([73a806c](73a806c6167476bcf47cca461d8cfdebe88450ba))
 - Disable twitter honkai parser ([a0c9575](a0c957555fd85588bec723e43e9a8fc25387bac6))
 - Enable twitter honkai parser ([776a407](776a407b578682fa2463282281af57518cd5bdf0))
+- Actually enable twitter honkai parser ([1efd211](1efd21112296d04641281c3c19c4539a37dce4fa))
 
 ### Features
 
@@ -25,6 +26,7 @@
 - Add more goals to TODO ([8559b65](8559b652a65903201b6a551607fc7c08f079539d))
 - Setup git-cliff ([cf46cd7](cf46cd76418278ac8c973b4d4de1108f7fd15011))
 - Bump deps ([f21c344](f21c344ce99c7639cd1e9c64498d20e7d7246665))
+- Bump deps ([e82111e](e82111e795d532db20b985038b890f245c1f7bd3))
 
 ### Refactor
 
