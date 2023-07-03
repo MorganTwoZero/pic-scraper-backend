@@ -1,6 +1,6 @@
 # Changelog
 
-## 2023-05-30 09:04 UTC
+## 2023-07-02 08:33 UTC
 
 ### Bug Fixes
 
@@ -10,6 +10,7 @@
 - Forgot to set page -1 in pagination ([344c7c6](344c7c67b96fa79d8119b6ceb928f5d4d177dca4))
 - Add telemetry env vars to the compose file ([9b9474b](9b9474b29b9b8be444e12ed1b0fbdddf97d9e1ce))
 - Add otel envs to the compose file ([73a806c](73a806c6167476bcf47cca461d8cfdebe88450ba))
+- Disable twitter honkai parser ([a0c9575](a0c957555fd85588bec723e43e9a8fc25387bac6))
 
 ### Features
 
@@ -22,6 +23,7 @@
 - Exclude files under tests/assets/ from language statistics ([3c69c70](3c69c70483d5392de121053c0402502ad180244b))
 - Add more goals to TODO ([8559b65](8559b652a65903201b6a551607fc7c08f079539d))
 - Setup git-cliff ([cf46cd7](cf46cd76418278ac8c973b4d4de1108f7fd15011))
+- Bump deps ([f21c344](f21c344ce99c7639cd1e9c64498d20e7d7246665))
 
 ### Build
 
