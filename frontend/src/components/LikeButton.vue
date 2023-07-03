@@ -1,6 +1,6 @@
 <template>
     <div v-if="isLikeable">
-        <button @click="like" class="btn btn-primary">Like</button>
+        <button @click="like" class="btn btn-primary">🤍</button>
     </div>
 </template>
 
@@ -22,10 +22,16 @@ function like(e) {
         params: {
             post_link: post_link.post_link
         }
+    }).then((response) => {
+        e.target.blur()
+        e.target.disabled = true
+        e.target.classList.add('btn-success')
     })
-    e.target.innerText = 'Liked'
-    e.target.blur()
-    e.target.disabled = true
-    e.target.classList.add('btn-success')
+    .catch((error) => {
+        e.target.innerText = error
+        e.target.blur()
+        e.target.disabled = true
+        e.target.classList.add('btn-danger')
+    })
 }
 </script>
