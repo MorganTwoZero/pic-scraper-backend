@@ -1,6 +1,6 @@
 # Changelog
 
-## 2023-07-03 20:56 UTC
+## 2023-07-05 21:50 UTC
 
 ### Bug Fixes
 
@@ -12,7 +12,7 @@
 - Add otel envs to the compose file ([73a806c](73a806c6167476bcf47cca461d8cfdebe88450ba))
 - Disable twitter honkai parser ([a0c9575](a0c957555fd85588bec723e43e9a8fc25387bac6))
 - Enable twitter honkai parser ([776a407](776a407b578682fa2463282281af57518cd5bdf0))
-- Actually enable twitter honkai parser ([1efd211](1efd21112296d04641281c3c19c4539a37dce4fa))
+- Actually enable twitter honkai parser ([748029e](748029e5089bd815ec4ca6fdeaa81df162f672ba))
 
 ### Features
 
@@ -27,6 +27,7 @@
 - Setup git-cliff ([cf46cd7](cf46cd76418278ac8c973b4d4de1108f7fd15011))
 - Bump deps ([f21c344](f21c344ce99c7639cd1e9c64498d20e7d7246665))
 - Bump deps ([e82111e](e82111e795d532db20b985038b890f245c1f7bd3))
+- Migrate sqlx to 0.7 ([54277d3](54277d3d9c167bb988d6499aaccc784a87f1f6f0))
 
 ### Refactor
 
