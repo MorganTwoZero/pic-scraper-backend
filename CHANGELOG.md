@@ -1,6 +1,6 @@
 # Changelog
 
-## 2023-07-05 21:50 UTC
+## 2023-07-05 22:03 UTC
 
 ### Bug Fixes
 
@@ -13,6 +13,7 @@
 - Disable twitter honkai parser ([a0c9575](a0c957555fd85588bec723e43e9a8fc25387bac6))
 - Enable twitter honkai parser ([776a407](776a407b578682fa2463282281af57518cd5bdf0))
 - Actually enable twitter honkai parser ([748029e](748029e5089bd815ec4ca6fdeaa81df162f672ba))
+- Sqlx version in CI workflow ([267aafc](267aafcb687f28ff30a420112b77969fcd832970))
 
 ### Features
 

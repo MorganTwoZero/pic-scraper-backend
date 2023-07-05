@@ -24,7 +24,7 @@ RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path r
 
 FROM clux/muslrust:stable AS builder
 COPY ./migrations ./migrations
-COPY ./sqlx-data.json .
+COPY ./.sqlx .
 COPY ./Cargo.lock .
 COPY ./Cargo.toml .
 COPY ./src ./src
