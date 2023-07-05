@@ -1,0 +1,84 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n            post_link,\n            preview_link,\n            images_number,\n            created,\n            author,\n            author_link,\n            source AS \"source!: PostSource\",\n            tags,\n            author_profile_image\n        FROM honkai_posts\n        WHERE source != 'twitterhome'\n        ORDER BY created DESC\n        LIMIT 20 OFFSET $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "post_link",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "preview_link",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "images_number",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "created",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "author",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "author_link",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "source!: PostSource",
+        "type_info": {
+          "Custom": {
+            "name": "post_source",
+            "kind": {
+              "Enum": [
+                "twitter",
+                "mihoyo",
+                "pixiv",
+                "bcy",
+                "lofter",
+                "twitterhome"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "tags",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 8,
+        "name": "author_profile_image",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "b400c10702034c929c86c7fef46469a6269a91ce7a563347877b2aa745209284"
+}

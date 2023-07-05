@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO honkai_posts (\n                post_link,\n                preview_link,\n                images_number,\n                created,\n                author,\n                author_link,\n                source,\n                tags,\n                author_profile_image\n            )\n            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)\n            ON CONFLICT (post_link) DO NOTHING\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int4",
+        "Text",
+        "Text",
+        "Text",
+        {
+          "Custom": {
+            "name": "post_source",
+            "kind": {
+              "Enum": [
+                "twitter",
+                "mihoyo",
+                "pixiv",
+                "bcy",
+                "lofter",
+                "twitterhome"
+              ]
+            }
+          }
+        },
+        "TextArray",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9c19ddc76d904a045c4a86a2449779c73cafc9bec2b971dca837468b8b049e6d"
+}
