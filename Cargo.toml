@@ -12,7 +12,7 @@ path = "src/main.rs"
 name = "pic-scraper-backend"
 
 [dependencies]
-axum = { version = "0.6.18", features = ["headers", "tracing"] }
+axum = { version = "0.6.19", features = ["headers", "tracing"] }
 hyper = "0.14.27"
 tower-http = { version = "0.4.1", features = ["trace", "fs"] }
 tokio = { version = "1.29.1", features = ["macros", "rt"] }
