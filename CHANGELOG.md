@@ -1,6 +1,6 @@
 # Changelog
 
-## 2023-07-05 23:07 UTC
+## 2023-08-02 05:12 UTC
 
 ### Bug Fixes
 
@@ -15,6 +15,7 @@
 - Actually enable twitter honkai parser ([748029e](748029e5089bd815ec4ca6fdeaa81df162f672ba))
 - Sqlx version in CI workflow ([267aafc](267aafcb687f28ff30a420112b77969fcd832970))
 - Copy sqlx query files in Dockerfile ([4e0b245](4e0b245c9619c4f68798d5cb8ac8b75b4f4bd7da))
+- Copy sqlx query files in Dockerfile (v2) ([75fa1e1](75fa1e18907fe7ee47840052cbdb1e9914dc2fec))
 
 ### Features
 
@@ -34,6 +35,7 @@
 ### Refactor
 
 - Add error handling to the like button ([4ce4fa7](4ce4fa7b8d99be2ec85f9d1d445df1ecd2edecee))
+- Split code into separate crates ([ebc35c2](ebc35c26faf40614dabe9d9347c1a77397beef84))
 
 ### Build
 

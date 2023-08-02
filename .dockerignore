@@ -1,6 +1,6 @@
-target/
-tests/
-Dockerfile
+*target/
+*tests/
+*Dockerfile
 docker-compose.yml
 docker-compose.dev.yml
 scripts/

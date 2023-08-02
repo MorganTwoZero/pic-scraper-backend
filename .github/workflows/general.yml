@@ -57,7 +57,7 @@ jobs:
           SKIP_DOCKER=true ./scripts/init_db.sh
 
       - name: Check sqlx-data.json is up-to-date
-        run: cargo sqlx prepare --check -- --bin pic-scraper-backend
+        run: cargo sqlx prepare --check --workspace -- --bin pic-scraper-backend
 
       - name: Run cargo test
         run: cargo test
@@ -203,7 +203,7 @@ jobs:
         HOST: ${{ secrets.HOST }}
         USERNAME: ${{ secrets.USERNAME }}
         KEY: ${{ secrets.SSHKEY }}
-        source: "docker-compose.yml, migrations, config"
+        source: "docker-compose.yml, ./backend/migrations, ./config"
         target: "pic-scraper-backend"
 
     - name: Spin up docker compose

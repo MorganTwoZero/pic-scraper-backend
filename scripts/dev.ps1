@@ -1,1 +1,1 @@
-docker compose -f ./docker-compose.dev.yml down && docker compose -f ./docker-compose.dev.yml up db -d && sqlx migrate run && cargo run
+docker compose -f ./docker-compose.dev.yml down && docker compose -f ./docker-compose.dev.yml up db -d && sqlx migrate run --source ./backend/migrations && cargo run

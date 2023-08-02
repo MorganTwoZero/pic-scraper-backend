@@ -3,10 +3,13 @@
 # Title
 
 ## TODO:
+ - [ ] gracefully handle errors in parsing
+ - [ ] cors
+ - [ ] cache for the pic proxy
  - [ ] search
  - [ ] mark seen
  - [ ] show newly added but old posts at the top
- - [ ] split functionality into crates
+ - [x] split functionality into crates
  - [x] opentelemetry
  - [x] sort by added (kinda. instead i removed "min_fav" constraint in the twitter honkai search query)
  - [x] make embed to work with slash pic num separator
