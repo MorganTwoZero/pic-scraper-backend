@@ -31,6 +31,8 @@
 - Bump deps ([f21c344](f21c344ce99c7639cd1e9c64498d20e7d7246665))
 - Bump deps ([e82111e](e82111e795d532db20b985038b890f245c1f7bd3))
 - Migrate sqlx to 0.7 ([54277d3](54277d3d9c167bb988d6499aaccc784a87f1f6f0))
+- Blacklist ([430a898](430a89867d91173aa8588d9bc4c5611c2f0e663d))
+- Bump deps ([44dd0e8](44dd0e82190ae7e26dd2726813aaf1b36668959e))
 
 ### Refactor
 
