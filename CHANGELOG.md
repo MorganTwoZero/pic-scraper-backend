@@ -16,6 +16,7 @@
 - Sqlx version in CI workflow ([267aafc](267aafcb687f28ff30a420112b77969fcd832970))
 - Copy sqlx query files in Dockerfile ([4e0b245](4e0b245c9619c4f68798d5cb8ac8b75b4f4bd7da))
 - Copy sqlx query files in Dockerfile (v2) ([75fa1e1](75fa1e18907fe7ee47840052cbdb1e9914dc2fec))
+- Copy sqlx query files in Dockerfile (v2) ([75fa1e1](75fa1e18907fe7ee47840052cbdb1e9914dc2fec))
 
 ### Features
 
@@ -31,6 +32,10 @@
 - Bump deps ([f21c344](f21c344ce99c7639cd1e9c64498d20e7d7246665))
 - Bump deps ([e82111e](e82111e795d532db20b985038b890f245c1f7bd3))
 - Migrate sqlx to 0.7 ([54277d3](54277d3d9c167bb988d6499aaccc784a87f1f6f0))
+- Blacklist ([430a898](430a89867d91173aa8588d9bc4c5611c2f0e663d))
+- Bump deps ([85b797b](85b797b0060d9a59bc1fde14a7d81d7b048d56f8))
+- Fix github language detection ([70ca81c](70ca81c0d97e7ac037f55c911c34438bbe4b9223))
+- Bump deps ([74636af](74636affca80b1065c45e67b96e6d572657393d6))
 - Blacklist ([430a898](430a89867d91173aa8588d9bc4c5611c2f0e663d))
 - Bump deps ([85b797b](85b797b0060d9a59bc1fde14a7d81d7b048d56f8))
 - Fix github language detection ([70ca81c](70ca81c0d97e7ac037f55c911c34438bbe4b9223))
