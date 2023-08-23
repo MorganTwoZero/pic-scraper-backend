@@ -109,10 +109,6 @@ impl Application {
 
     pub async fn build(config: Settings) -> Self {
         let db_pool = Self::get_connection_pool(&config.database);
-        sqlx::migrate!("../migrations")
-            .run(&db_pool)
-            .await
-            .expect("Failed to run migrations");
 
         let addr = format!("{}:{}", config.app.host, config.app.port);
         let listener = TcpListener::bind(&addr).expect("Failed to create a TcpListener");
