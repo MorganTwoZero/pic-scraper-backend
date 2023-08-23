@@ -14,12 +14,12 @@ use tokio::signal;
 use tower_http::services::{ServeDir, ServeFile};
 
 use crate::{
-    embed::{embed, proxy_image_route},
     load::{load_honkai_posts, load_twitter_home_posts},
     site_routes::{last_update, like},
     Error,
 };
 use config_structs::{ApiState, DatabaseSettings, Settings};
+use embed::{embed, proxy_image_route};
 
 #[derive(Clone)]
 pub struct StateWrapper(Arc<ApiState>);
@@ -103,7 +103,7 @@ impl Application {
             .route("/en/artworks/:path/:pic_num", get(embed))
             .nest_service("/", serve_dir.clone())
             .fallback_service(serve_dir)
-            .layer(telemetry::opentelemetry_tracing_layer())
+            .layer(tele::opentelemetry_tracing_layer())
             .with_state(state)
     }
 

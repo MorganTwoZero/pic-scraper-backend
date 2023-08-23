@@ -61,9 +61,7 @@ impl Application {
             .build()?)
     }
 
-    pub async fn run(
-        self,
-    ) -> Result<(TaskInstancesChain, TaskInstancesChain), Error> {
+    pub async fn run(self) -> Result<(TaskInstancesChain, TaskInstancesChain), Error> {
         let body = move || {
             let state = self.state.clone();
             async move {
