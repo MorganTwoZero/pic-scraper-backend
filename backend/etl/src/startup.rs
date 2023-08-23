@@ -1,4 +1,4 @@
-use std::{sync::Arc, time::Duration};
+use std::{fs, sync::Arc, time::Duration};
 
 use axum::extract::FromRef;
 use delay_timer::prelude::{DelayTimerBuilder, TaskBuilder, TaskInstancesChain};
@@ -27,6 +27,7 @@ pub struct Application {
 
 impl Application {
     pub fn create_api_client(config: &Settings) -> Result<Client, Error> {
+        let mut file_headers = read_headers()?;
         let headers = vec![
             (
                 "cookie",
@@ -42,7 +43,7 @@ impl Application {
                 config.app.headers.csrf_token.expose_secret().to_owned(),
             ),
             (
-                "user-agent",
+                "User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0"
                     .to_owned(),
             ),
@@ -55,9 +56,10 @@ impl Application {
             val.set_sensitive(true);
             headers_map.insert(key, val);
         }
+        file_headers.extend(headers_map.into_iter());
         Ok(Client::builder()
             .timeout(Duration::from_secs(10))
-            .default_headers(headers_map)
+            .default_headers(file_headers)
             .build()?)
     }
 
@@ -113,6 +115,21 @@ impl Application {
 
         Self { state }
     }
+}
+
+fn read_headers() -> Result<header::HeaderMap, Error> {
+    let contents = fs::read_to_string("headers.txt").map_err(|e| anyhow::anyhow!(e))?;
+
+    let mut headers = header::HeaderMap::new();
+    for line in contents.lines() {
+        let (key, value) = line.split_once(": ").expect("Invalid header line");
+        headers.insert(
+            header::HeaderName::from_bytes(key.as_bytes()).map_err(|e| anyhow::anyhow!(e))?,
+            header::HeaderValue::from_str(value).map_err(|e| anyhow::anyhow!(e))?,
+        );
+    }
+
+    Ok(headers)
 }
 
 pub async fn shutdown_signal() {
