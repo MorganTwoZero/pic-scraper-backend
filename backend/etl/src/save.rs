@@ -53,9 +53,9 @@ pub async fn save_honkai_posts(db_pool: &PgPool, posts: Vec<Post>) -> Result<()>
 #[tracing::instrument(skip_all)]
 pub async fn save_update_time(db_pool: &PgPool) -> Result<()> {
     sqlx::query!(
-        "INSERT INTO last_update_time (id, last_update_time)
-        VALUES (0, NOW())
-        ON CONFLICT (id) DO NOTHING;"
+        "UPDATE last_update_time
+        SET last_update_time = NOW()
+        WHERE id = 0;"
     )
     .execute(db_pool)
     .await?;

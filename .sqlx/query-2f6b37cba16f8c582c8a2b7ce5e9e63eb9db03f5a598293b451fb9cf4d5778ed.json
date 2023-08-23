@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE last_update_time\n        SET last_update_time = NOW()\n        WHERE id = 0;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "2f6b37cba16f8c582c8a2b7ce5e9e63eb9db03f5a598293b451fb9cf4d5778ed"
+}
