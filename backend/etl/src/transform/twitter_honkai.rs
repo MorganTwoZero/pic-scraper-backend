@@ -8,46 +8,148 @@ use crate::{
 
 use super::DataSource;
 
-#[derive(Deserialize, Serialize)]
-struct TweetHonkai {
-    created_at: String,
-    entities: Entities,
-    user: User,
+#[derive(Serialize, Deserialize)]
+struct TweetResult {
+    #[serde(rename = "entryId")]
+    entry_id: String,
+    content: TweetContent,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Serialize, Deserialize)]
+struct TweetContent {
+    #[serde(rename = "itemContent")]
+    item_content: ItemContent,
+}
+
+#[derive(Serialize, Deserialize)]
+struct ItemContent {
+    tweet_results: TweetResults,
+}
+
+#[derive(Serialize, Deserialize)]
+struct TweetResults {
+    result: Tweet,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Tweet {
+    core: Core,
+    legacy: Legacy,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Core {
+    user_results: UserResults,
+}
+
+#[derive(Serialize, Deserialize)]
+struct UserResults {
+    result: User,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct User {
+    legacy: UserLegacy,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct UserLegacy {
+    name: String,
+    profile_image_url_https: String,
+    screen_name: String,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct Legacy {
+    created_at: String,
+    entities: Entities,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
 struct Entities {
-    hashtags: Option<Vec<Hashtag>>,
     media: Option<Vec<Media>>,
 }
 
-#[derive(Deserialize, Serialize)]
-struct Hashtag {
-    text: String,
-}
-
-#[derive(Deserialize, Serialize)]
+#[derive(Serialize, Deserialize, Clone)]
 struct Media {
-    media_url_https: String,
     expanded_url: String,
+    media_url_https: String,
 }
 
-#[derive(Deserialize, Serialize)]
-struct User {
-    name: String,
-    screen_name: String,
-    profile_image_url_https: String,
+#[derive(Serialize, Deserialize)]
+struct Cursor {
+    #[serde(rename = "entryId")]
+    entry_id: String,
+    content: CursorContent,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Serialize, Deserialize)]
+struct CursorContent {
+    #[serde(rename = "entryType")]
+    entry_type: String,
+    value: String,
+    #[serde(rename = "cursorType")]
+    cursor_type: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Data {
+    search_by_raw_query: SearchByRawQuery,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct TwitterHonkaiResponse {
-    statuses: Vec<TweetHonkai>,
+    data: Data,
 }
 
-impl TryFrom<TweetHonkai> for Post {
+#[derive(Serialize, Deserialize)]
+struct SearchByRawQuery {
+    search_timeline: SearchTimeline,
+}
+
+#[derive(Serialize, Deserialize)]
+struct SearchTimeline {
+    timeline: Timeline,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Timeline {
+    instructions: Vec<Instruction>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Instruction {
+    entries: Vec<Entry>,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(untagged)]
+enum Entry {
+    TweetResult(TweetResult),
+    Cursor(Cursor),
+}
+
+impl TryFrom<TweetResult> for Post {
     type Error = Error;
 
-    fn try_from(value: TweetHonkai) -> Result<Self, Self::Error> {
+    fn try_from(value: TweetResult) -> Result<Self, Self::Error> {
+        let user = value
+            .content
+            .item_content
+            .tweet_results
+            .result
+            .core
+            .user_results
+            .result
+            .legacy
+            .clone();
+        let value = value
+            .content
+            .item_content
+            .tweet_results
+            .result
+            .legacy
+            .clone();
         let created = DateTime::parse_from_str(&value.created_at, "%a %b %d %H:%M:%S %z %Y")
             .ok()
             .ok_or(Error::Parsing)?
@@ -59,21 +161,16 @@ impl TryFrom<TweetHonkai> for Post {
         let main_pic = <Vec<Media> as AsRef<[Media]>>::as_ref(media.as_ref())
             .get(0)
             .ok_or(Error::Parsing)?;
-        let tags = value.entities.hashtags.map(|tags| {
-            tags.into_iter()
-                .map(|tag| tag.text)
-                .collect::<Vec<String>>()
-        });
         Ok(Self {
             preview_link: main_pic.media_url_https.to_string(),
             post_link: main_pic.expanded_url.replace("/photo/1", ""),
-            author_link: format!("https://twitter.com/{}", value.user.screen_name),
-            author: format!("{}@{}", value.user.name, value.user.screen_name),
+            author_link: format!("https://twitter.com/{}", user.screen_name),
+            author: format!("{}@{}", user.name, user.screen_name),
             created,
             source: PostSource::Twitter,
             images_number: media.len() as i32,
-            tags,
-            author_profile_image: Some(value.user.profile_image_url_https),
+            tags: None,
+            author_profile_image: Some(user.profile_image_url_https),
         })
     }
 }
@@ -81,10 +178,30 @@ impl TryFrom<TweetHonkai> for Post {
 impl From<TwitterHonkaiResponse> for Vec<Post> {
     fn from(value: TwitterHonkaiResponse) -> Self {
         value
-            .statuses
+            .data
+            .search_by_raw_query
+            .search_timeline
+            .timeline
+            .instructions
             .into_iter()
-            .filter(|tw| tw.entities.media.is_some())
-            .filter_map(|tw| Post::try_from(tw).ok())
+            .flat_map(|entry| {
+                entry.entries.into_iter().filter_map(|entry| match entry {
+                    Entry::TweetResult(tw)
+                        if tw
+                            .content
+                            .item_content
+                            .tweet_results
+                            .result
+                            .legacy
+                            .entities
+                            .media
+                            .is_some() =>
+                    {
+                        Post::try_from(tw).ok()
+                    }
+                    _ => None,
+                })
+            })
             .collect()
     }
 }
