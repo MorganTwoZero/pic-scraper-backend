@@ -1,14 +1,14 @@
 use reqwest::Client;
 
 use crate::{
-    load::save_honkai_posts,
+    save::{save_honkai_posts, save_update_time},
     transform::{
         BcyResponse, DataSource, LofterResponse, MihoyoResponse, MultiUrlDataSource, PixivResponse,
         Post, TwitterHomeResponse, TwitterHonkaiResponse,
     },
     Result,
 };
-use config_structs::{AppState, BlackList, SourcesUrls};
+use config_structs::{BlackList, ScraperState, SourcesUrls};
 use errors::Error;
 
 pub async fn create_vec_posts(
@@ -39,18 +39,21 @@ pub async fn create_vec_posts(
 }
 
 #[tracing::instrument(skip_all)]
-pub async fn fill_db(state: &AppState) -> Result<String> {
+pub async fn fill_db(state: &ScraperState) -> Result<String> {
     let posts = create_vec_posts(&state.api_client, &state.blacklist, &state.sources_urls).await?;
     save_honkai_posts(&state.db_pool, posts).await?;
+    save_update_time(&state.db_pool).await?;
     Ok(chrono::Utc::now().to_rfc3339())
 }
 
 fn is_in_blacklist(p: &Post, blacklist: &BlackList) -> bool {
     let author_in_blacklist = blacklist.authors.contains(&p.author);
-    let tag_in_blacklist = match &p.tags {
-        Some(tags) => tags.iter().any(|tag| blacklist.tags.contains(tag)),
-        None => false,
-    };
+    let tag_in_blacklist = p
+        .tags
+        .as_ref()
+        .map(|tags| tags.iter().any(|tag| blacklist.tags.contains(tag)))
+        .unwrap_or(false);
+
     author_in_blacklist | tag_in_blacklist
 }
 

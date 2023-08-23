@@ -35,7 +35,7 @@ services:
       
     restart: unless-stopped
     image: morgan20/pic-scraper-backend:stage
-    #build: .
+    command: /api
     volumes:
       - ./config:/home/nonroot/config:ro
     depends_on: 
@@ -43,6 +43,24 @@ services:
         condition: service_healthy
     ports:
       - 8001:8001
+
+  scraper:
+    environment:
+      - APP_ENVIRONMENT=stage
+      - APP_database__password=${POSTGRES_PASSWORD}
+
+      - APP_app__api_client_headers__cookie
+      - APP_app__api_client_headers__authorization
+      - APP_app__api_client_headers__csrf_token
+
+    restart: unless-stopped
+    image: morgan20/pic-scraper-backend:stage
+    command: /scraper
+    volumes:
+      - ./config:/home/nonroot/config:ro
+    depends_on: 
+      db-stage:
+        condition: service_healthy
 
 networks:
   default:

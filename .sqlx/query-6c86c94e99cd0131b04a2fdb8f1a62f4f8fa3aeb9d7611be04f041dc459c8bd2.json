@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO last_update_time (id, last_update_time)\n        VALUES (0, NOW())\n        ON CONFLICT (id) DO NOTHING;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "6c86c94e99cd0131b04a2fdb8f1a62f4f8fa3aeb9d7611be04f041dc459c8bd2"
+}

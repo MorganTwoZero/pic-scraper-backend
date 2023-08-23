@@ -1,6 +1,6 @@
-use pic_scraper_backend::{
-    config::get_configuration, startup::Application, telemetry::setup_telemetry,
-};
+use api::startup::Application;
+use config_builder::get_configuration;
+use tele::setup_telemetry;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -13,7 +13,6 @@ async fn main() -> anyhow::Result<()> {
         config.app.port
     );
     let app = Application::build(config).await;
-    app.create_fill_db_task().await.unwrap();
     app.run_until_stopped().await.unwrap();
 
     Ok(())

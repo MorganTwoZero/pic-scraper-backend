@@ -1,6 +1,6 @@
 # Changelog
 
-## 2023-08-02 05:12 UTC
+## 2023-08-02 08:32 UTC
 
 ### Bug Fixes
 
@@ -15,7 +15,6 @@
 - Actually enable twitter honkai parser ([748029e](748029e5089bd815ec4ca6fdeaa81df162f672ba))
 - Sqlx version in CI workflow ([267aafc](267aafcb687f28ff30a420112b77969fcd832970))
 - Copy sqlx query files in Dockerfile ([4e0b245](4e0b245c9619c4f68798d5cb8ac8b75b4f4bd7da))
-- Copy sqlx query files in Dockerfile (v2) ([75fa1e1](75fa1e18907fe7ee47840052cbdb1e9914dc2fec))
 - Copy sqlx query files in Dockerfile (v2) ([75fa1e1](75fa1e18907fe7ee47840052cbdb1e9914dc2fec))
 
 ### Features
@@ -36,15 +35,18 @@
 - Bump deps ([85b797b](85b797b0060d9a59bc1fde14a7d81d7b048d56f8))
 - Fix github language detection ([70ca81c](70ca81c0d97e7ac037f55c911c34438bbe4b9223))
 - Bump deps ([74636af](74636affca80b1065c45e67b96e6d572657393d6))
-- Blacklist ([430a898](430a89867d91173aa8588d9bc4c5611c2f0e663d))
-- Bump deps ([85b797b](85b797b0060d9a59bc1fde14a7d81d7b048d56f8))
-- Fix github language detection ([70ca81c](70ca81c0d97e7ac037f55c911c34438bbe4b9223))
-- Bump deps ([74636af](74636affca80b1065c45e67b96e6d572657393d6))
+- Bump frontend deps ([b725125](b7251259a4e3a2dcceb0c7fcf60943a40326bcbb))
+- Blacklist ([28eb2d0](28eb2d0b5cf0a5587098da2ce879fd610c2b93d2))
+- Fix github language detection ([5fad73f](5fad73f390efab6ad2dd63de36f197feb50e5083))
+- Bump deps ([207dd18](207dd189b239db804b78e0e978132be7f6a5da61))
+- Bump frontend deps ([844f712](844f712eacd0e03940f5bfb779d7c78c5345bea8))
+- Bump deps ([3149218](31492181fd92a981eb14556e09d2a4d587c1181f))
 
 ### Refactor
 
 - Add error handling to the like button ([4ce4fa7](4ce4fa7b8d99be2ec85f9d1d445df1ecd2edecee))
-- Split code into separate crates ([ebc35c2](ebc35c26faf40614dabe9d9347c1a77397beef84))
+- Split code into separate crates ([781f2fd](781f2fd8fbd9e546099b75720397cf00bac107e9))
+- Split code into separate crates ([3c1fa13](3c1fa13b18098e4f749f52d6c87087c84caa4564))
 
 ### Build
 

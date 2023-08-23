@@ -12,7 +12,7 @@ use regex::Regex;
 use reqwest::Url;
 use serde_json::Value;
 
-use config_structs::AppState;
+use config_structs::ApiState;
 use errors::Error;
 
 #[derive(Debug)]
@@ -66,7 +66,7 @@ where
 
 #[tracing::instrument(skip(state))]
 pub async fn embed(
-    State(state): State<AppState>,
+    State(state): State<ApiState>,
     path: Uri,
     TypedHeader(user_agent): TypedHeader<UserAgent>,
     pixiv_id: PixivId,
@@ -105,7 +105,7 @@ async fn html(user_agent: UserAgent, pixiv_id: PixivId) -> Response {
 
 async fn jpg(
     pixiv_id: PixivId,
-    state: AppState,
+    state: ApiState,
 ) -> Result<StreamBody<impl Stream<Item = reqwest::Result<Bytes>>>, Error> {
     let url = Url::parse(&format!(
         "{}{}",
@@ -145,7 +145,7 @@ fn get_img_url(json: &Value, pic_num: u8, replace_str: &str) -> Option<String> {
 // i need this func to accept url in form of a https://{api_url}?url={url}
 #[tracing::instrument(skip(api_client))]
 pub async fn proxy_image_route(
-    State(AppState { api_client, .. }): State<AppState>,
+    State(ApiState { api_client, .. }): State<ApiState>,
     Query(UrlWrapper { url }): Query<UrlWrapper>,
 ) -> Result<StreamBody<impl Stream<Item = reqwest::Result<Bytes>>>, Error> {
     let mut req_builder = api_client.get(url.as_str());

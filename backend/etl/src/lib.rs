@@ -1,10 +1,10 @@
-pub mod extract;
-mod load;
+mod extract;
+mod save;
+pub mod startup;
 mod transform;
 
 use errors::Error;
-pub use extract::{create_vec_posts, fill_db};
-pub use load::{load_honkai_posts, load_twitter_home_posts};
-pub use transform::Post;
+pub use transform::{Post, PostSource};
+pub use extract::fill_db;
 
-pub type Result<T, E = Error> = std::result::Result<T, E>;
+type Result<T, E = Error> = std::result::Result<T, E>;

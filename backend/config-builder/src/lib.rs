@@ -36,6 +36,7 @@ pub enum Environment {
     Local,
     Prod,
     Stage,
+    LocalDocker,
 }
 
 impl Environment {
@@ -44,6 +45,7 @@ impl Environment {
             Environment::Local => "local",
             Environment::Prod => "prod",
             Environment::Stage => "stage",
+            Environment::LocalDocker => "localdocker",
         }
     }
 }
@@ -56,8 +58,9 @@ impl TryFrom<String> for Environment {
             "local" => Ok(Self::Local),
             "prod" => Ok(Self::Prod),
             "stage" => Ok(Self::Stage),
+            "localdocker" => Ok(Self::LocalDocker),
             other => Err(format!(
-                "{other} is not a supported environment. Use either `stage`, `local` or `prod`."
+                "{other} is not a supported environment. Use either `stage`, `local`, `localdocker` or `prod`."
             )),
         }
     }

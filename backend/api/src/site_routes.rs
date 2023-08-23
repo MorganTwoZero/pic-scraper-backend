@@ -1,16 +1,10 @@
 use axum::extract::{Query, State};
-use chrono::{DateTime, Utc};
 
-use crate::Error;
-use config_structs::AppState;
+use crate::{load::load_last_update_time, Error};
+use config_structs::ApiState;
 
-pub(crate) async fn last_update(State(state): State<AppState>) -> String {
-    DateTime::<Utc>::from_utc(
-        chrono::NaiveDateTime::from_timestamp_opt(*state.last_update_time.lock().unwrap(), 0)
-            .unwrap(),
-        Utc,
-    )
-    .to_rfc3339()
+pub(crate) async fn last_update(State(state): State<ApiState>) -> Result<String, Error> {
+    Ok(load_last_update_time(&state.db_pool).await?.to_rfc3339())
 }
 
 #[derive(serde::Deserialize)]
@@ -19,7 +13,7 @@ pub(crate) struct PostLink {
 }
 
 pub(crate) async fn like(
-    State(AppState { api_client, .. }): State<AppState>,
+    State(ApiState { api_client, .. }): State<ApiState>,
     Query(PostLink { post_link }): Query<PostLink>,
 ) -> Result<(), Error> {
     api_client.post(make_like_url(post_link)).send().await?;

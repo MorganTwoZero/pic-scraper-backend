@@ -1,5 +1,3 @@
-use std::sync::{Arc, Mutex};
-
 use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use tracing::{subscriber::set_global_default, Subscriber};
@@ -11,8 +9,9 @@ use tracing_subscriber::{
 use uuid::Uuid;
 use wiremock::MockServer;
 
-use config_structs::{AppState, DatabaseSettings};
-use pic_scraper_backend::{config::get_configuration, startup::Application, SourcesUrls};
+use api::startup::Application as ApiApplication;
+use config_builder::get_configuration;
+use config_structs::{ApiState, DatabaseSettings, ScraperState, SourcesUrls};
 
 fn get_subscriber<Sink>(
     name: String,
@@ -55,14 +54,15 @@ static TRACING: Lazy<()> = Lazy::new(|| {
     };
 });
 
-pub struct TestApp {
+pub struct TestApi {
     pub addr: String,
     pub port: u16,
     pub mock_server: MockServer,
-    pub state: AppState,
+    pub api_state: ApiState,
+    pub scraper_state: ScraperState,
 }
 
-pub async fn spawn_app() -> TestApp {
+pub async fn spawn_api() -> TestApi {
     Lazy::force(&TRACING);
 
     let mock_server = MockServer::builder().start().await;
@@ -88,26 +88,33 @@ pub async fn spawn_app() -> TestApp {
 
     let db_pool = configure_db(&config.database).await;
 
-    let app = Application::build(config.clone()).await;
+    let app = ApiApplication::build(config.clone()).await;
     let port = app.port;
     let addr = format!("http://127.0.0.1:{}", port);
 
-    let state = AppState {
+    let api_state = ApiState {
+        db_pool: db_pool.clone(),
+        api_client: ApiApplication::create_api_client(&config)
+            .expect("Failed to create the api client"),
+        sources_urls: config.app.sources_urls.clone(),
+    };
+
+    let scraper_state = ScraperState {
         db_pool,
-        api_client: Application::create_api_client(&config)
+        api_client: ApiApplication::create_api_client(&config)
             .expect("Failed to create the api client"),
         blacklist: config.app.blacklist,
         sources_urls: config.app.sources_urls,
-        last_update_time: Arc::new(Mutex::new(0)),
     };
 
     tokio::spawn(app.run_until_stopped());
 
-    TestApp {
+    TestApi {
         addr,
         port,
         mock_server,
-        state,
+        api_state,
+        scraper_state,
     }
 }
 

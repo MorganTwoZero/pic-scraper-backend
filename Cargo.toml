@@ -1,2 +1,2 @@
 [workspace]
-members = ["backend/pic-scraper-backend", "backend/config-structs", "backend/embed", "backend/errors", "backend/etl", "backend/tests"]
+members = ["backend/api", "backend/config-structs", "backend/config-builder", "backend/embed", "backend/errors", "backend/etl", "backend/tests", "backend/tele"]

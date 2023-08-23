@@ -5,11 +5,11 @@ use wiremock::{Mock, Request, ResponseTemplate};
 
 use etl::{fill_db, Post};
 
-use tests::spawn_app;
+use tests::spawn_api;
 
 #[tokio::test]
 async fn test_update_fills_db() {
-    let app = spawn_app().await;
+    let app = spawn_api().await;
 
     let pixiv_json = fs::read_to_string("assets/json/pixiv.json").expect("Unable to read the file");
     let bcy_json = fs::read_to_string("assets/json/bcy.json").expect("Unable to read the file");
@@ -62,10 +62,10 @@ async fn test_update_fills_db() {
         .mount(&app.mock_server)
         .await;
 
-    fill_db(&app.state).await.unwrap();
+    fill_db(&app.scraper_state).await.unwrap();
 
     let posts = app
-        .state
+        .api_state
         .api_client
         .get(format!("{}/api/honkai?page=1", app.addr))
         .send()

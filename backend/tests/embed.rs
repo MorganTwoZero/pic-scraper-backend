@@ -5,14 +5,14 @@ use reqwest::Client;
 use tokio;
 use wiremock::{matchers::path, Mock, ResponseTemplate};
 
-use tests::{assert_is_redirect_to, spawn_app};
+use tests::{assert_is_redirect_to, spawn_api};
 
 #[tokio::test]
 async fn test_embed_user_agent_check_from_discord() {
     // if discord's user-agent send html
-    let app = spawn_app().await;
+    let app = spawn_api().await;
     let response = app
-        .state
+        .api_state
         .api_client
         .get(format!("{}/en/artworks/123", app.addr))
         .header(
@@ -31,7 +31,7 @@ async fn test_embed_user_agent_check_from_discord() {
     );
 
     let response = app
-        .state
+        .api_state
         .api_client
         .get(format!("{}/en/artworks/123", app.addr))
         .header(
@@ -53,7 +53,7 @@ async fn test_embed_user_agent_check_from_discord() {
 #[tokio::test]
 async fn test_embed_user_agent_check_from_browser() {
     // if not a discord's user-agent, then redirect to pixiv
-    let app = spawn_app().await;
+    let app = spawn_api().await;
     let client = Client::builder().redirect(Policy::none()).build().unwrap();
     let response = client
         .get(format!("{}/en/artworks/106595952", app.addr))
@@ -69,7 +69,7 @@ async fn test_embed_user_agent_check_from_browser() {
 
 #[tokio::test]
 async fn test_embed_jpg_single_image() {
-    let app = spawn_app().await;
+    let app = spawn_api().await;
     let pixiv_details_json =
         fs::read_to_string("./assets/json/embed-single.json").expect("Unable to read the file");
     let pixiv_image =
@@ -92,7 +92,7 @@ async fn test_embed_jpg_single_image() {
     .await;
 
     let response = app
-        .state
+        .api_state
         .api_client
         .get(format!("{}/en/artworks/106859625.jpg", app.addr))
         .send()
@@ -106,7 +106,7 @@ async fn test_embed_jpg_single_image() {
 
 #[tokio::test]
 async fn test_embed_jpg_p_separator() {
-    let app = spawn_app().await;
+    let app = spawn_api().await;
     let pixiv_details_json =
         fs::read_to_string("./assets/json/embed-multiple.json").expect("Unable to read the file");
     let pixiv_image =
@@ -129,7 +129,7 @@ async fn test_embed_jpg_p_separator() {
     .await;
 
     let response = app
-        .state
+        .api_state
         .api_client
         .get(format!("{}/en/artworks/106856624_p1.jpg", app.addr))
         .send()
@@ -143,7 +143,7 @@ async fn test_embed_jpg_p_separator() {
 
 #[tokio::test]
 async fn test_embed_jpg_slash_separator() {
-    let app = spawn_app().await;
+    let app = spawn_api().await;
     let pixiv_details_json =
         fs::read_to_string("./assets/json/embed-multiple.json").expect("Unable to read the file");
     let pixiv_image =
@@ -166,7 +166,7 @@ async fn test_embed_jpg_slash_separator() {
     .await;
 
     let response = app
-        .state
+        .api_state
         .api_client
         .get(format!("{}/en/artworks/106856624/2.jpg", app.addr))
         .send()

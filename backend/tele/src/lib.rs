@@ -18,6 +18,8 @@ use tracing_subscriber::{
     fmt::format::FmtSpan, layer::SubscriberExt, prelude::*, registry::LookupSpan, Layer,
 };
 
+pub use opentelemetry::global::shutdown_tracer_provider as shutdown_tracing;
+
 #[derive(Clone, Copy, Debug)]
 pub struct OtelMakeSpan;
 

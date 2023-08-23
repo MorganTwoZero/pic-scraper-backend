@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use reqwest::Client;
 use secrecy::{ExposeSecret, Secret};
@@ -24,16 +24,28 @@ pub struct BlackList {
 }
 
 #[derive(Clone)]
-pub struct AppState {
+pub struct ScraperState {
     pub db_pool: PgPool,
     pub api_client: Client,
     pub blacklist: BlackList,
     pub sources_urls: SourcesUrls,
-    pub last_update_time: Arc<Mutex<i64>>,
 }
 
-impl From<Arc<AppState>> for AppState {
-    fn from(arc: Arc<AppState>) -> Self {
+impl From<Arc<ScraperState>> for ScraperState {
+    fn from(arc: Arc<ScraperState>) -> Self {
+        (*arc).clone()
+    }
+}
+
+#[derive(Clone)]
+pub struct ApiState {
+    pub db_pool: PgPool,
+    pub api_client: Client,
+    pub sources_urls: SourcesUrls,
+}
+
+impl From<Arc<ApiState>> for ApiState {
+    fn from(arc: Arc<ApiState>) -> Self {
         (*arc).clone()
     }
 }

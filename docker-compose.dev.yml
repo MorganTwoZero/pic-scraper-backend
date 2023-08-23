@@ -17,11 +17,13 @@ services:
 
   web:
     environment:
-      - APP_ENVIRONMENT=local
+      - APP_ENVIRONMENT=localdocker
+      - RUST_LOG
       - APP_app__api_client_headers__cookie
       - APP_app__api_client_headers__authorization
       - APP_app__api_client_headers__csrf_token
     build: .
+    command: /api
     volumes:
       - ./config:/home/nonroot/config:ro
     depends_on: 
@@ -29,3 +31,20 @@ services:
         condition: service_healthy
     ports:
       - "8000:8000"
+
+  scraper:
+    environment:
+      - APP_ENVIRONMENT=localdocker
+      - RUST_LOG
+      - APP_app__api_client_headers__cookie
+      - APP_app__api_client_headers__authorization
+      - APP_app__api_client_headers__csrf_token
+    build: .
+    command: /scraper
+    volumes:
+      - ./config:/home/nonroot/config:ro
+    depends_on: 
+      db:
+        condition: service_healthy
+      web:
+        condition: service_started
