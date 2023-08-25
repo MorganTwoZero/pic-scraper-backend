@@ -9,13 +9,12 @@ use crate::{
     Result,
 };
 use config_structs::{BlackList, ScraperState, SourcesUrls};
-use errors::Error;
 
 pub async fn create_vec_posts(
     client: &Client,
     blacklist: &BlackList,
     urls: &SourcesUrls,
-) -> Result<Vec<Post>, Error> {
+) -> Vec<Post> {
     let fut_tuple = futures::join!(
         PixivResponse::request_and_parse(client, &urls.pixiv),
         TwitterHonkaiResponse::request_and_parse(client, &urls.twitter_honkai),
@@ -24,23 +23,26 @@ pub async fn create_vec_posts(
         TwitterHomeResponse::request_and_parse(client, &urls.twitter_home),
         LofterResponse::request_and_parse_multi(client, LofterResponse::urls(&urls.lofter)),
     );
-    Ok(vec![
-        fut_tuple.0?,
-        fut_tuple.1?,
-        fut_tuple.2?,
-        fut_tuple.3?,
-        fut_tuple.4?,
-        fut_tuple.5?,
-    ]
-    .into_iter()
-    .flatten()
-    .filter(|p| !is_in_blacklist(p, blacklist))
-    .collect())
+    let fut_vec = vec![
+        fut_tuple.0,
+        fut_tuple.1,
+        fut_tuple.2,
+        fut_tuple.3,
+        fut_tuple.4,
+        fut_tuple.5,
+    ];
+
+    fut_vec
+        .into_iter()
+        .filter_map(Result::ok)
+        .flatten()
+        .filter(|p| !is_in_blacklist(p, blacklist))
+        .collect()
 }
 
 #[tracing::instrument(skip_all)]
 pub async fn fill_db(state: &ScraperState) -> Result<String> {
-    let posts = create_vec_posts(&state.api_client, &state.blacklist, &state.sources_urls).await?;
+    let posts = create_vec_posts(&state.api_client, &state.blacklist, &state.sources_urls).await;
     save_honkai_posts(&state.db_pool, posts).await?;
     save_update_time(&state.db_pool).await?;
     Ok(chrono::Utc::now().to_rfc3339())

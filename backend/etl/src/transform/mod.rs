@@ -47,8 +47,18 @@ pub trait DataSource: Into<Vec<Post>> + DeserializeOwned {
     fn url() -> &'static str;
 
     async fn request_and_parse(client: &Client, url: &str) -> Result<Vec<Post>, Error> {
-        let response = client.get(url).send().await?;
-        let parsed = response.json::<Self>().await?.into();
+        let response = client.get(url).send().await.map_err(|e| {
+            tracing::warn!("Failed to make a request. Error: {}. URL: {}", e, url);
+            e
+        })?;
+        let parsed = response
+            .json::<Self>()
+            .await
+            .map_err(|e| {
+                tracing::warn!("Failed to parse a response. Error: {}. URL: {}", e, url);
+                e
+            })?
+            .into();
         Ok(parsed)
     }
 }
