@@ -58,6 +58,7 @@ services:
     command: /scraper
     volumes:
       - ./config:/home/nonroot/config:ro
+      - ./headers.txt:/home/nonroot/headers.txt:ro
     depends_on: 
       db:
         condition: service_healthy
