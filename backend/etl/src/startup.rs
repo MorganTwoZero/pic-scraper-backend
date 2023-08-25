@@ -27,7 +27,7 @@ pub struct Application {
 
 impl Application {
     pub fn create_api_client(config: &Settings) -> Result<Client, Error> {
-        let mut file_headers = read_headers()?;
+        let file_headers = read_headers().ok();
         let headers = vec![
             (
                 "cookie",
@@ -56,10 +56,14 @@ impl Application {
             val.set_sensitive(true);
             headers_map.insert(key, val);
         }
-        file_headers.extend(headers_map.into_iter());
+        if let Some(file_headers) = file_headers {
+            headers_map.extend(file_headers.into_iter())
+        }        
+
         Ok(Client::builder()
             .timeout(Duration::from_secs(10))
-            .default_headers(file_headers)
+            .redirect(reqwest::redirect::Policy::limited(30))
+            .default_headers(headers_map)
             .build()?)
     }
 
