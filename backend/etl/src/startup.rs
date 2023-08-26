@@ -58,7 +58,7 @@ impl Application {
         }
         if let Some(file_headers) = file_headers {
             headers_map.extend(file_headers.into_iter())
-        }        
+        }
 
         Ok(Client::builder()
             .timeout(Duration::from_secs(10))
