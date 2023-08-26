@@ -1,2 +1,3 @@
 [workspace]
 members = ["backend/api", "backend/config-structs", "backend/config-builder", "backend/embed", "backend/errors", "backend/etl", "backend/tests", "backend/tele"]
+resolver = "2"
