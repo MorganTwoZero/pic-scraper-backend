@@ -204,7 +204,7 @@ jobs:
         HOST: ${{ secrets.HOST }}
         USERNAME: ${{ secrets.USERNAME }}
         KEY: ${{ secrets.SSHKEY }}
-        source: "docker-compose.yml, ./backend/migrations, ./config"
+        source: "docker-compose.stage.yml, ./backend/migrations, ./config"
         target: "pic-scraper-backend-stage"
 
     - name: Spin up docker compose
