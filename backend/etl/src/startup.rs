@@ -57,7 +57,7 @@ impl Application {
             headers_map.insert(key, val);
         }
         if let Some(file_headers) = file_headers {
-            headers_map.extend(file_headers.into_iter())
+            headers_map.extend(file_headers)
         }
 
         Ok(Client::builder()
