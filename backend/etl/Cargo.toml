@@ -20,7 +20,7 @@ hyper = "0.14.27"
 reqwest = { version = "0.11.19", default-features = false, features = ["json"] }
 scraper = "0.17.1"
 secrecy = { version = "0.8.0", features = ["serde"] }
-serde = { version = "1.0.185", features = ["derive"] }
+serde = { version = "1.0.188", features = ["derive"] }
 serde_json = "1.0.105"
 sqlx = { version = "0.7.1", default-features = false, features = ["postgres", "macros", "runtime-tokio-rustls", "chrono"] }
 tokio = { version = "1.32.0", features = ["macros", "rt"] }
