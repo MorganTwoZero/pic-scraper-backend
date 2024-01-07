@@ -1,13 +1,11 @@
 use axum::{
+    body::Body,
     async_trait,
-    body::{Bytes, StreamBody},
     extract::{FromRequestParts, Query, State},
-    headers::UserAgent,
     http::{request::Parts, Uri},
     response::{IntoResponse, Redirect, Response},
-    TypedHeader,
 };
-use futures::Stream;
+use axum_extra::{headers::UserAgent, TypedHeader};
 use regex::Regex;
 use reqwest::Url;
 use serde_json::Value;
@@ -106,7 +104,7 @@ async fn html(user_agent: UserAgent, pixiv_id: PixivId) -> Response {
 async fn jpg(
     pixiv_id: PixivId,
     state: ApiState,
-) -> Result<StreamBody<impl Stream<Item = reqwest::Result<Bytes>>>, Error> {
+) -> Result<Body, Error> {
     let url = Url::parse(&format!(
         "{}{}",
         state.sources_urls.pixiv_details, pixiv_id.post_id
@@ -147,7 +145,7 @@ fn get_img_url(json: &Value, pic_num: u8, replace_str: &str) -> Option<String> {
 pub async fn proxy_image_route(
     State(ApiState { api_client, .. }): State<ApiState>,
     Query(UrlWrapper { url }): Query<UrlWrapper>,
-) -> Result<StreamBody<impl Stream<Item = reqwest::Result<Bytes>>>, Error> {
+) -> Result<Body, Error> {
     let mut req_builder = api_client.get(url.as_str());
 
     // if lofter
@@ -156,7 +154,7 @@ pub async fn proxy_image_route(
     }
 
     let res = req_builder.send().await?.bytes_stream();
-    Ok(StreamBody::new(res))
+    Ok(Body::from_stream(res))
 }
 
 #[derive(Debug, serde::Deserialize)]

@@ -3,3 +3,4 @@
 !frontend/.env
 postgres-data
 headers.txt
+*.vscode

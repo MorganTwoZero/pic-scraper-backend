@@ -3,8 +3,7 @@ use std::{fs, sync::Arc, time::Duration};
 use axum::extract::FromRef;
 use delay_timer::prelude::{DelayTimerBuilder, TaskBuilder, TaskInstancesChain};
 
-use hyper::header;
-use reqwest::Client;
+use reqwest::{Client, header};
 use secrecy::ExposeSecret;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tokio::signal;

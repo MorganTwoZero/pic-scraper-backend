@@ -1,16 +1,14 @@
 use std::{
-    net::{SocketAddr, TcpListener},
     sync::Arc,
     time::Duration,
 };
 
 use axum::{extract::FromRef, routing::get, Router};
 
-use hyper::{header, Server};
-use reqwest::Client;
+use reqwest::{Client, header};
 use secrecy::ExposeSecret;
 use sqlx::{postgres::PgPoolOptions, PgPool};
-use tokio::signal;
+use tokio::{net::TcpListener, signal};
 use tower_http::services::{ServeDir, ServeFile};
 
 use crate::{
@@ -37,8 +35,9 @@ pub struct Application {
 }
 
 impl Application {
-    pub async fn run_until_stopped(self) -> Result<(), hyper::Error> {
-        Server::from_tcp(self.listener)
+    pub async fn run_until_stopped(self) -> Result<(), std::io::Error> {
+        axum::serve(self.listener, self.router).await
+        /* Server::from_tcp(self.listener)
             .expect("Failed to bind a TcpListener")
             .serve(
                 self.router
@@ -46,6 +45,7 @@ impl Application {
             )
             .with_graceful_shutdown(shutdown_signal())
             .await
+        */
     }
 
     pub fn create_api_client(config: &Settings) -> Result<Client, Error> {
@@ -103,7 +103,8 @@ impl Application {
             .route("/en/artworks/:path/:pic_num", get(embed))
             .nest_service("/", serve_dir.clone())
             .fallback_service(serve_dir)
-            .layer(tele::opentelemetry_tracing_layer())
+            // TODO
+            // .layer(tele::opentelemetry_tracing_layer())
             .with_state(state)
     }
 
@@ -111,7 +112,7 @@ impl Application {
         let db_pool = Self::get_connection_pool(&config.database);
 
         let addr = format!("{}:{}", config.app.host, config.app.port);
-        let listener = TcpListener::bind(&addr).expect("Failed to create a TcpListener");
+        let listener = TcpListener::bind(&addr).await.expect("Failed to create a TcpListener");
         let port = listener
             .local_addr()
             .expect("Failed to read the listener's address")
