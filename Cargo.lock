@@ -88,7 +88,6 @@ dependencies = [
  "config",
  "config-builder",
  "config-structs",
- "delay_timer",
  "dotenvy",
  "embed",
  "errors",
@@ -530,7 +529,9 @@ checksum = "7f2c685bad3eb3d45a01354cedb7d5faa66194d1d58ba6e267a8de788f79db38"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
+ "js-sys",
  "num-traits",
+ "wasm-bindgen",
  "windows-targets",
 ]
 
@@ -642,7 +643,8 @@ checksum = "9cace84e55f07e7301bae1c519df89cdad8cc3cd868413d3fdbdeca9ff3db484"
 [[package]]
 name = "cron_clock"
 version = "0.8.0"
-source = "git+https://github.com/MorganTwoZero/cron_clock.git#297987dd1d88116c97e688523745edb3720b7ad5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a8699d8ed16e3db689f8ae04d8dc3c6666a4ba7e724e5a157884b7cc385d16b"
 dependencies = [
  "chrono",
  "nom",
@@ -742,8 +744,9 @@ checksum = "eaa37046cc0f6c3cc6090fbdbf73ef0b8ef4cfcc37f6befc0020f63e8cf121e1"
 
 [[package]]
 name = "delay_timer"
-version = "0.11.4"
-source = "git+https://github.com/MorganTwoZero/delay-timer.git#c7f4dc8fa47b0425eb482deab51f0c67b0ec945e"
+version = "0.11.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d70c0d5d2addc05d1e0cf7e60b3a5bf08415f03136a773d7c66b4e4a3b892cef"
 dependencies = [
  "anyhow",
  "async-trait",

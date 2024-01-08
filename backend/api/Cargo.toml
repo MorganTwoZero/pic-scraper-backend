@@ -17,7 +17,6 @@ async-trait = "0.1.77"
 axum = { version = "0.7.3", features = ["tracing"] }
 chrono = { version = "0.4.31", default-features = false, features = ["std"] }
 config = "0.13.4"
-delay_timer = { git = "https://github.com/MorganTwoZero/delay-timer.git" }
 dotenvy = "0.15.7"
 futures = "0.3.30"
 futures-util = "0.3.30"
