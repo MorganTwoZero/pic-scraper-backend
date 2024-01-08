@@ -188,20 +188,23 @@ impl From<TwitterHonkaiResponse> for Vec<Post> {
             .instructions
             .into_iter()
             .flat_map(|instruction| {
-                instruction.entries.into_iter().filter_map(|entry| match entry.content {
-                    Content::Tweet { itemContent } => {
-                        let tweet = match itemContent.tweet_results.result {
-                            TweetResult::Normal(normal) => normal,
-                            TweetResult::Limited(limited) => limited.tweet,
-                        };
-                        if tweet.legacy.entities.media.is_some() {
-                            Post::try_from(tweet).ok()
-                        } else {
-                            None
+                instruction
+                    .entries
+                    .into_iter()
+                    .filter_map(|entry| match entry.content {
+                        Content::Tweet { itemContent } => {
+                            let tweet = match itemContent.tweet_results.result {
+                                TweetResult::Normal(normal) => normal,
+                                TweetResult::Limited(limited) => limited.tweet,
+                            };
+                            if tweet.legacy.entities.media.is_some() {
+                                Post::try_from(tweet).ok()
+                            } else {
+                                None
+                            }
                         }
-                    },
-                    _ => None,
-                })
+                        _ => None,
+                    })
             })
             .collect()
     }

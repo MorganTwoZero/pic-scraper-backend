@@ -1,14 +1,11 @@
-use std::{
-    sync::Arc,
-    time::Duration,
-};
+use std::{sync::Arc, time::Duration};
 
 use axum::{extract::FromRef, routing::get, Router};
 
-use reqwest::{Client, header};
+use reqwest::{header, Client};
 use secrecy::ExposeSecret;
 use sqlx::{postgres::PgPoolOptions, PgPool};
-use tokio::{net::TcpListener, signal};
+use tokio::net::TcpListener;
 use tower_http::services::{ServeDir, ServeFile};
 
 use crate::{
@@ -37,15 +34,6 @@ pub struct Application {
 impl Application {
     pub async fn run_until_stopped(self) -> Result<(), std::io::Error> {
         axum::serve(self.listener, self.router).await
-        /* Server::from_tcp(self.listener)
-            .expect("Failed to bind a TcpListener")
-            .serve(
-                self.router
-                    .into_make_service_with_connect_info::<SocketAddr>(),
-            )
-            .with_graceful_shutdown(shutdown_signal())
-            .await
-        */
     }
 
     pub fn create_api_client(config: &Settings) -> Result<Client, Error> {
@@ -112,7 +100,9 @@ impl Application {
         let db_pool = Self::get_connection_pool(&config.database);
 
         let addr = format!("{}:{}", config.app.host, config.app.port);
-        let listener = TcpListener::bind(&addr).await.expect("Failed to create a TcpListener");
+        let listener = TcpListener::bind(&addr)
+            .await
+            .expect("Failed to create a TcpListener");
         let port = listener
             .local_addr()
             .expect("Failed to read the listener's address")
@@ -131,32 +121,4 @@ impl Application {
             listener,
         }
     }
-}
-
-async fn shutdown_signal() {
-    let ctrl_c = async {
-        signal::ctrl_c()
-            .await
-            .expect("failed to install Ctrl+C handler");
-    };
-
-    #[cfg(unix)]
-    let terminate = async {
-        signal::unix::signal(signal::unix::SignalKind::terminate())
-            .expect("failed to install signal handler")
-            .recv()
-            .await;
-    };
-
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
-
-    tokio::select! {
-        _ = ctrl_c => {},
-        _ = terminate => {},
-    }
-
-    println!("signal received, starting graceful shutdown");
-
-    tele::shutdown_tracing();
 }

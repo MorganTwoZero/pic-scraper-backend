@@ -1,6 +1,6 @@
 use axum::{
-    body::Body,
     async_trait,
+    body::Body,
     extract::{FromRequestParts, Query, State},
     http::{request::Parts, Uri},
     response::{IntoResponse, Redirect, Response},
@@ -101,10 +101,7 @@ async fn html(user_agent: UserAgent, pixiv_id: PixivId) -> Response {
     }
 }
 
-async fn jpg(
-    pixiv_id: PixivId,
-    state: ApiState,
-) -> Result<Body, Error> {
+async fn jpg(pixiv_id: PixivId, state: ApiState) -> Result<Body, Error> {
     let url = Url::parse(&format!(
         "{}{}",
         state.sources_urls.pixiv_details, pixiv_id.post_id
