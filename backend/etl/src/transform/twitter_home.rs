@@ -55,7 +55,7 @@ impl TryFrom<TweetHome> for Post {
             .media
             .expect("Checked in From<TwitterHomeResponse>");
         let main_pic = <Vec<Media> as AsRef<[Media]>>::as_ref(media.as_ref())
-            .get(0)
+            .first()
             .ok_or(Error::Parsing)?;
         let tags = value.entities.hashtags.map(|tags| {
             tags.into_iter()

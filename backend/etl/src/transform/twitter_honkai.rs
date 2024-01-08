@@ -162,7 +162,7 @@ impl TryFrom<Tweet> for Post {
             .media
             .expect("Checked in From<TwitterHomeResponse>");
         let main_pic = <Vec<Media> as AsRef<[Media]>>::as_ref(media.as_ref())
-            .get(0)
+            .first()
             .ok_or(Error::Parsing)?;
         Ok(Self {
             preview_link: main_pic.media_url_https.to_string(),
