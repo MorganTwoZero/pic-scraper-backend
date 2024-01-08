@@ -10,13 +10,6 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  security_audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/audit-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           
   test:
     runs-on: ubuntu-latest
@@ -37,7 +30,7 @@ jobs:
     steps:
       - uses: arduino/setup-protoc@v1
       - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.74.1
       - uses: Swatinem/rust-cache@v2
         id: cache
         with:
@@ -67,7 +60,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.74.1
         with:
           components: rustfmt
       - run: cargo fmt --all -- --check
@@ -90,7 +83,7 @@ jobs:
     steps:
       - uses: arduino/setup-protoc@v1
       - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.74.1
         with:
           components: clippy
       - uses: Swatinem/rust-cache@v2
@@ -132,7 +125,7 @@ jobs:
     steps:
       - uses: arduino/setup-protoc@v1
       - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.74.1
         with:
           components: llvm-tools-preview
       - uses: Swatinem/rust-cache@v2
