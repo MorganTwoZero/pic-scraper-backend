@@ -9,17 +9,19 @@ COPY ./frontend .
 ARG VITE_APP_BACKEND_URL
 RUN npm run build
 
-FROM lukemathwalker/cargo-chef:0.1.62-rust-1.74-slim-bookworm AS planner
+FROM clux/muslrust:1.74.1 AS planner
+RUN cargo install cargo-chef
 COPY ./Cargo.lock .
 COPY ./Cargo.toml .
 COPY ./backend ./backend
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM lukemathwalker/cargo-chef:0.1.62-rust-1.74-slim-bookworm AS cacher
+FROM clux/muslrust:1.74.1 AS cacher
+RUN cargo install cargo-chef
 COPY --from=planner /volume/recipe.json recipe.json
 RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 
-FROM lukemathwalker/cargo-chef:0.1.62-rust-1.74-slim-bookworm AS builder
+FROM clux/muslrust:1.74.1 AS builder
 COPY ./backend/migrations ./backend/migrations
 COPY ./.sqlx ./.sqlx
 COPY ./Cargo.lock .
