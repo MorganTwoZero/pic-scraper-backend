@@ -66,7 +66,7 @@ impl DataSource for PixivResponse {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json;
+
     use std::fs;
 
     const PIXIV_JSON_PATH: &str = "../tests/assets/json/pixiv.json";

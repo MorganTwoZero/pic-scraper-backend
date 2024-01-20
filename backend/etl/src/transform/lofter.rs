@@ -182,7 +182,7 @@ mod tests {
             .into_iter()
             .filter(|html| !html.is_empty())
             .map(|html| Html::parse_document(&html))
-            .map(|fragment| {
+            .flat_map(|fragment| {
                 fragment
                     .select(&post_selector)
                     .filter(|item| match item.value().attr("data-type") {
@@ -265,7 +265,6 @@ mod tests {
                     })
                     .collect::<Vec<_>>()
             })
-            .flatten()
             .for_each(drop);
     }
 }
