@@ -1,2 +1,2 @@
-tests/assets/** linguist-vendored
+backend/tests/assets/** linguist-vendored
 * text=auto
