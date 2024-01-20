@@ -1,5 +1,6 @@
+use async_trait::async_trait;
 use chrono::DateTime;
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 
 use crate::{
     transform::{Post, PostSource},
@@ -9,43 +10,131 @@ use crate::{
 use super::DataSource;
 
 #[derive(Deserialize)]
-pub struct TwitterHomeResponse(Vec<TweetHome>);
-
-#[derive(Deserialize)]
-struct TweetHome {
-    created_at: String,
-    entities: Entities,
-    user: User,
+pub struct TwitterHomeResponse {
+    pub data: Data,
 }
 
 #[derive(Deserialize)]
-struct Entities {
-    hashtags: Option<Vec<HashTag>>,
-    media: Option<Vec<Media>>,
+pub struct Data {
+    pub home: Home,
 }
 
 #[derive(Deserialize)]
-struct HashTag {
-    text: String,
+pub struct Home {
+    pub home_timeline_urt: HomeTimelineUrt,
 }
 
 #[derive(Deserialize)]
-struct Media {
-    media_url_https: String,
-    expanded_url: String,
+pub struct HomeTimelineUrt {
+    pub instructions: Vec<Instruction>,
 }
 
 #[derive(Deserialize)]
-struct User {
-    name: String,
-    screen_name: String,
-    profile_image_url_https: String,
+pub struct Instruction {
+    pub entries: Vec<Entry>,
 }
 
-impl TryFrom<TweetHome> for Post {
+pub struct Entry {
+    pub entry_id: String,
+    pub content: Option<Content>,
+}
+
+impl<'de> Deserialize<'de> for Entry {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let json: serde_json::Value = serde_json::Value::deserialize(deserializer)?;
+        let entry_id = json["entryId"].as_str().unwrap().to_owned();
+
+        let content = match entry_id.starts_with("tweet") {
+            true => Some(serde_json::from_value::<Content>(json["content"].clone()).unwrap()),
+            false => None,
+        };
+
+        Ok(Entry { entry_id, content })
+    }
+}
+
+#[derive(Deserialize)]
+pub struct Content {
+    #[serde(rename = "itemContent")]
+    pub item_content: ItemContent,
+}
+
+#[derive(Deserialize)]
+pub struct ItemContent {
+    pub tweet_results: TweetResults,
+}
+
+#[derive(Deserialize)]
+pub struct TweetResults {
+    pub result: TweetResult,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub enum TweetResult {
+    Limited(Limited),
+    Normal(Tweet),
+}
+
+#[derive(Deserialize)]
+pub struct Limited {
+    pub tweet: Tweet,
+}
+
+#[derive(Deserialize)]
+pub struct Tweet {
+    pub core: Core,
+    pub legacy: Legacy2,
+}
+
+#[derive(Deserialize)]
+pub struct Core {
+    pub user_results: UserResults,
+}
+
+#[derive(Deserialize)]
+pub struct UserResults {
+    pub result: Result2,
+}
+
+#[derive(Deserialize)]
+pub struct Result2 {
+    pub legacy: Legacy,
+}
+
+#[derive(Deserialize)]
+pub struct Legacy {
+    pub name: String,
+    pub profile_image_url_https: String,
+    pub screen_name: String,
+}
+
+#[derive(Deserialize)]
+pub struct Legacy2 {
+    pub created_at: String,
+    pub entities: Entities,
+}
+
+#[derive(Deserialize)]
+pub struct Entities {
+    pub media: Option<Vec<Media>>,
+}
+
+#[derive(Deserialize)]
+pub struct Media {
+    pub expanded_url: String,
+    pub media_url_https: String,
+}
+
+impl TryFrom<Tweet> for Post {
     type Error = Error;
 
-    fn try_from(value: TweetHome) -> Result<Self, Self::Error> {
+    fn try_from(value: Tweet) -> Result<Self, Self::Error> {
+        let user = value.core.user_results.result.legacy;
+        let value = value.legacy;
         let created = DateTime::parse_from_str(&value.created_at, "%a %b %d %H:%M:%S %z %Y")
             .ok()
             .ok_or(Error::Parsing)?
@@ -57,21 +146,16 @@ impl TryFrom<TweetHome> for Post {
         let main_pic = <Vec<Media> as AsRef<[Media]>>::as_ref(media.as_ref())
             .first()
             .ok_or(Error::Parsing)?;
-        let tags = value.entities.hashtags.map(|tags| {
-            tags.into_iter()
-                .map(|tag| tag.text)
-                .collect::<Vec<String>>()
-        });
         Ok(Self {
             preview_link: main_pic.media_url_https.to_string(),
             post_link: main_pic.expanded_url.replace("/photo/1", ""),
-            author_link: format!("https://twitter.com/{}", value.user.screen_name),
-            author: format!("{}@{}", value.user.name, value.user.screen_name),
+            author_link: format!("https://twitter.com/{}", user.screen_name),
+            author: format!("{}@{}", user.name, user.screen_name),
             created,
             source: PostSource::TwitterHome,
             images_number: media.len() as i32,
-            tags,
-            author_profile_image: Some(value.user.profile_image_url_https),
+            tags: None,
+            author_profile_image: Some(user.profile_image_url_https),
         })
     }
 }
@@ -79,31 +163,57 @@ impl TryFrom<TweetHome> for Post {
 impl From<TwitterHomeResponse> for Vec<Post> {
     fn from(value: TwitterHomeResponse) -> Self {
         value
-            .0
+            .data
+            .home
+            .home_timeline_urt
+            .instructions
             .into_iter()
-            .filter(|tw| tw.entities.media.is_some())
-            .filter_map(|tw| Post::try_from(tw).ok())
+            .flat_map(|instruction| {
+                instruction
+                    .entries
+                    .into_iter()
+                    .filter(|entry| entry.content.is_some())
+                    .filter_map(|entry| match entry.content {
+                        Some(content) => {
+                            let tweet = match content.item_content.tweet_results.result {
+                                TweetResult::Normal(normal) => normal,
+                                TweetResult::Limited(limited) => limited.tweet,
+                            };
+                            if tweet.legacy.entities.media.is_some() {
+                                Post::try_from(tweet).ok()
+                            } else {
+                                None
+                            }
+                        }
+                        _ => None,
+                    })
+            })
             .collect()
     }
 }
 
+#[async_trait]
 impl DataSource for TwitterHomeResponse {
     fn url() -> &'static str {
-        "https://api.twitter.com/1.1/statuses/home_timeline.json?tweet_mode=extended&exclude_replies=1&include_rts=0&count=200"
+        "https://twitter.com/i/api/graphql/FzFZiwiotK-RNG6tbQ2dcg/HomeTimeline?variables=%7B%22count%22%3A20%2C%22includePromotedContent%22%3Atrue%2C%22latestControlAvailable%22%3Atrue%2C%22requestContext%22%3A%22launch%22%2C%22withCommunity%22%3Atrue%7D&features=%7B%22responsive_web_graphql_exclude_directive_enabled%22%3Atrue%2C%22verified_phone_label_enabled%22%3Afalse%2C%22creator_subscriptions_tweet_preview_api_enabled%22%3Atrue%2C%22responsive_web_graphql_timeline_navigation_enabled%22%3Atrue%2C%22responsive_web_graphql_skip_user_profile_image_extensions_enabled%22%3Afalse%2C%22c9s_tweet_anatomy_moderator_badge_enabled%22%3Atrue%2C%22tweetypie_unmention_optimization_enabled%22%3Atrue%2C%22responsive_web_edit_tweet_api_enabled%22%3Atrue%2C%22graphql_is_translatable_rweb_tweet_is_translatable_enabled%22%3Atrue%2C%22view_counts_everywhere_api_enabled%22%3Atrue%2C%22longform_notetweets_consumption_enabled%22%3Atrue%2C%22responsive_web_twitter_article_tweet_consumption_enabled%22%3Atrue%2C%22tweet_awards_web_tipping_enabled%22%3Afalse%2C%22freedom_of_speech_not_reach_fetch_enabled%22%3Atrue%2C%22standardized_nudges_misinfo%22%3Atrue%2C%22tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled%22%3Atrue%2C%22rweb_video_timestamps_enabled%22%3Atrue%2C%22longform_notetweets_rich_text_read_enabled%22%3Atrue%2C%22longform_notetweets_inline_media_enabled%22%3Atrue%2C%22responsive_web_media_download_video_enabled%22%3Afalse%2C%22responsive_web_enhance_cards_enabled%22%3Afalse%7D
+        "
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json;
+
     use std::fs;
 
     const SAMPLE_JSON_PATH: &str = "../tests/assets/json/twitter-home.json";
 
     #[test]
-    fn test_from_twitter_home_response_to_vec_posts() {
+    fn test_twitter_home_from_json() {
         let sample_json = fs::read_to_string(SAMPLE_JSON_PATH).expect("Unable to read the file");
-        serde_json::from_str::<TwitterHomeResponse>(&sample_json).unwrap();
+        let jd = &mut serde_json::Deserializer::from_str(&sample_json);
+        let result: Result<TwitterHomeResponse, _> = serde_path_to_error::deserialize(jd);
+
+        result.unwrap();
     }
 }
