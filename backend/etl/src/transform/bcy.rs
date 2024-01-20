@@ -70,7 +70,7 @@ impl DataSource for BcyResponse {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json;
+
     use std::fs;
 
     const SAMPLE_JSON_PATH: &str = "../tests/assets/json/bcy.json";

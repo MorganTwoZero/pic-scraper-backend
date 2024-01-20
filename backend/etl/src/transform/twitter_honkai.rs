@@ -219,13 +219,13 @@ impl DataSource for TwitterHonkaiResponse {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json;
+
     use std::fs;
 
     const SAMPLE_JSON_PATH: &str = "../tests/assets/json/twitter-honkai.json";
 
     #[test]
-    fn test_from_twitter_response_to_vec_posts() {
+    fn test_twitter_honkai_from_json() {
         let sample_json = fs::read_to_string(SAMPLE_JSON_PATH).expect("Unable to read the file");
         let jd = &mut serde_json::Deserializer::from_str(&sample_json);
         let result: Result<TwitterHonkaiResponse, _> = serde_path_to_error::deserialize(jd);

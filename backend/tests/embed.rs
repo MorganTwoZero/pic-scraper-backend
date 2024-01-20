@@ -2,7 +2,7 @@ use std::fs;
 
 use reqwest::redirect::Policy;
 use reqwest::Client;
-use tokio;
+
 use wiremock::{matchers::path, Mock, ResponseTemplate};
 
 use tests::{assert_is_redirect_to, spawn_api};

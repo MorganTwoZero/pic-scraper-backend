@@ -75,5 +75,5 @@ async fn test_update_fills_db() {
         .await
         .unwrap();
 
-    assert!(posts.len() > 0);
+    assert!(!posts.is_empty());
 }
