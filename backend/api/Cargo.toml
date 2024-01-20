@@ -14,7 +14,7 @@ name = "api"
 [dependencies]
 anyhow = "1.0.79"
 async-trait = "0.1.77"
-axum = { version = "0.7.3", features = ["tracing"] }
+axum = { version = "0.7.4", features = ["tracing"] }
 chrono = { version = "0.4.31", default-features = false, features = ["std"] }
 config = "0.13.4"
 dotenvy = "0.15.7"
@@ -30,10 +30,10 @@ reqwest = { version = "0.11.23", default-features = false, features = [
 secrecy = { version = "0.8.0", features = ["serde"] }
 serde = { version = "1.0.195", features = ["derive"] }
 serde_json = "1.0.111"
-serde-aux = { version = "4.3.1", default-features = false }
+serde-aux = { version = "4.4.0", default-features = false }
 thiserror = "1.0.56"
 tokio = { version = "1.35.1", features = ["macros", "rt"] }
-tower-http = { version = "0.5.0", features = ["trace", "fs"] }
+tower-http = { version = "0.5.1", features = ["trace", "fs"] }
 tracing = { version = "0.1.40", features = ["log"] }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter", "json"] }
 
@@ -46,7 +46,7 @@ etl = { path = "../etl" }
 tele = { path = "../tele" }
 
 [dependencies.uuid]
-version = "1.6.1"
+version = "1.7.0"
 features = ["v4", "fast-rng", "macro-diagnostics", "serde"]
 
 [dependencies.sqlx]
