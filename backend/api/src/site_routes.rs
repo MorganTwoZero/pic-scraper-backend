@@ -12,36 +12,40 @@ pub(crate) struct PostLink {
     post_link: String,
 }
 
+#[tracing::instrument(skip(api_client))]
 pub(crate) async fn like(
     State(ApiState { api_client, .. }): State<ApiState>,
     Query(PostLink { post_link }): Query<PostLink>,
 ) -> Result<(), Error> {
-    api_client.post(make_like_url(post_link)).send().await?;
+    let json = serde_json::json!({
+        "variables": { "tweet_id": extract_post_id(&post_link) }
+    });
+    api_client
+        .post("https://twitter.com/i/api/graphql/lI07N6Otwv1PhnEgXILM7A/FavoriteTweet")
+        .json(&json)
+        .send()
+        .await?;
     Ok(())
 }
 
-fn make_like_url(post_link: String) -> String {
+fn extract_post_id(post_link: &str) -> &str {
     let index = post_link.len()
         - post_link
             .chars()
             .take(19)
             .map(|c| c.len_utf8())
             .sum::<usize>();
-    let post_id = &post_link[index..];
-    "https://api.twitter.com/1.1/favorites/create.json?id=".to_string() + post_id
+    &post_link[index..]
 }
 
 #[cfg(test)]
 mod tests {
-    use super::make_like_url;
+    use super::extract_post_id;
 
     #[test]
-    fn test_make_like_url() {
-        let sample_link = "https://twitter.com/magion02/status/1647973748564455425".to_string();
-        let like_url = make_like_url(sample_link);
-        assert_eq!(
-            "https://api.twitter.com/1.1/favorites/create.json?id=1647973748564455425",
-            like_url
-        );
+    fn test_extract_post_id() {
+        let sample_link = "https://twitter.com/magion02/status/1647973748564455425";
+        let post_id = extract_post_id(sample_link);
+        assert_eq!("1647973748564455425", post_id);
     }
 }
