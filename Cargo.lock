@@ -371,11 +371,7 @@ dependencies = [
  "pin-project-lite",
  "rustversion",
  "serde",
- "serde_json",
- "serde_path_to_error",
- "serde_urlencoded",
  "sync_wrapper",
- "tokio",
  "tower",
  "tower-layer",
  "tower-service",
@@ -1571,7 +1567,7 @@ dependencies = [
  "httpdate",
  "itoa",
  "pin-project-lite",
- "socket2 0.5.5",
+ "socket2 0.4.10",
  "tokio",
  "tower-service",
  "tracing",
@@ -3494,7 +3490,7 @@ dependencies = [
 name = "tele"
 version = "0.1.0"
 dependencies = [
- "axum 0.6.20",
+ "axum 0.7.4",
  "opentelemetry",
  "opentelemetry-otlp",
  "tonic",
