@@ -1,6 +1,6 @@
 <template>
-  <div v-for="post in posts" :key="post.post_link">
-    <PostsComponent :post="post" />
+  <div v-for="post in posts" :key="post.post_link" @keydown.enter="openInNewTab" @keydown.up.prevent="prevPost" @keydown.down.prevent="nextPost" tabindex="0"> 
+	<PostsComponent :post="post" />
   </div>
   <div id="loading">
     <svg viewBox="25 25 50 50">
@@ -22,6 +22,20 @@ let page = 0;
 let isLoading = false;
 let nextPage = true;
 let throttleTimeout = null;
+
+function openInNewTab(event) {
+  window.open(event.target.href, "_blank");
+}
+
+function nextPost(event) {
+  event.target.parentNode.nextSibling.firstElementChild.focus({ preventScroll: true });
+  event.target.parentNode.nextSibling.firstElementChild.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function prevPost(event) {
+  event.target.parentNode.previousSibling.firstElementChild.focus({ preventScroll: true });
+  event.target.parentNode.previousSibling.firstElementChild.scrollIntoView({ behavior: "smooth", block: "center" });
+}
 
 function setLoadingObserver() {
   const loadingObserver = new IntersectionObserver(handleObserver);
