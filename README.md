@@ -3,8 +3,8 @@
 # Title
 
 ## TODO:
- - [ ] telemetry
- - [ ] frontend: arrows navigation
+ - [x] telemetry
+ - [x] frontend: arrows navigation
  - [ ] gracefully handle errors in parsing
  - [ ] cors
  - [ ] cache for the pic proxy
