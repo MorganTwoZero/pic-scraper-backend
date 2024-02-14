@@ -1,7 +1,7 @@
 use std::{sync::Arc, time::Duration};
 
 use axum::{extract::FromRef, routing::get, Router};
-use axum_tracing_opentelemetry::middleware::{OtelAxumLayer, OtelInResponseLayer};
+
 use reqwest::{header, Client};
 use secrecy::ExposeSecret;
 use sqlx::{postgres::PgPoolOptions, PgPool};
@@ -91,8 +91,8 @@ impl Application {
             .route("/en/artworks/:path/:pic_num", get(embed))
             .nest_service("/", serve_dir.clone())
             .fallback_service(serve_dir)
-            .layer(OtelInResponseLayer)
-            .layer(OtelAxumLayer::default())
+            // TODO
+            // .layer(tele::opentelemetry_tracing_layer())
             .with_state(state)
     }
 
