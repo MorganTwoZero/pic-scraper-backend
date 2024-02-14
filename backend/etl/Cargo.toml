@@ -24,7 +24,7 @@ secrecy = { version = "0.8.0", features = ["serde"] }
 serde = { version = "1.0.196", features = ["derive"] }
 serde_json = "1.0.113"
 sqlx = { version = "0.7.3", default-features = false, features = ["postgres", "macros", "runtime-tokio-rustls", "chrono"] }
-tokio = { version = "1.35.1", features = ["macros", "rt"] }
+tokio = { version = "1.36.0", features = ["macros", "rt"] }
 tracing = { version = "0.1.40", features = ["log"] }
 
 # local deps
