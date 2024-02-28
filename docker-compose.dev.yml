@@ -18,10 +18,11 @@ services:
   web:
     environment:
       - APP_ENVIRONMENT=localdocker
-      - RUST_LOG
-      - APP_app__api_client_headers__cookie
-      - APP_app__api_client_headers__authorization
-      - APP_app__api_client_headers__csrf_token
+
+      - APP_app__headers__cookie=${APP_app__headers__cookie}
+      - APP_app__headers__authorization=${APP_app__headers__authorization}
+      - APP_app__headers__csrf_token=${APP_app__headers__csrf_token}
+      - RUST_LOG=${RUST_LOG}
     build: .
     command: /api
     volumes:
@@ -35,10 +36,11 @@ services:
   scraper:
     environment:
       - APP_ENVIRONMENT=localdocker
-      - RUST_LOG
-      - APP_app__api_client_headers__cookie
-      - APP_app__api_client_headers__authorization
-      - APP_app__api_client_headers__csrf_token
+
+      - APP_app__headers__cookie=${APP_app__headers__cookie}
+      - APP_app__headers__authorization=${APP_app__headers__authorization}
+      - APP_app__headers__csrf_token=${APP_app__headers__csrf_token}
+      - RUST_LOG=${RUST_LOG}
     build: .
     command: /scraper
     volumes:
