@@ -19,19 +19,19 @@ services:
       - APP_ENVIRONMENT=prod
       - APP_database__password=${POSTGRES_PASSWORD}
 
-      - APP_app__headers__cookie
-      - APP_app__headers__authorization
-      - APP_app__headers__csrf_token
+      - APP_app__headers__cookie=${APP_app__headers__cookie}
+      - APP_app__headers__authorization=${APP_app__headers__authorization}
+      - APP_app__headers__csrf_token=${APP_app__headers__csrf_token}
 
       - VIRTUAL_HOST=pixiv.sbs,www.pixiv.sbs
       - VIRTUAL_PORT=8000
       - LETSENCRYPT_HOST=pixiv.sbs,www.pixiv.sbs
 
-      - RUST_LOG
-      - OTEL_EXPORTER_OTLP_ENDPOINT
-      - OTEL_EXPORTER_OTLP_HEADERS
-      - OTEL_SERVICE_NAME
-      - OTEL_TRACES_SAMPLER
+      - RUST_LOG=${RUST_LOG}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_EXPORTER_OTLP_HEADERS=${OTEL_EXPORTER_OTLP_HEADERS}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME}
+      - OTEL_TRACES_SAMPLER=${OTEL_TRACES_SAMPLER}
       
     restart: unless-stopped
     image: morgan20/pic-scraper-backend
@@ -49,15 +49,15 @@ services:
       - APP_ENVIRONMENT=prod
       - APP_database__password=${POSTGRES_PASSWORD}
 
-      - APP_app__api_client_headers__cookie
-      - APP_app__api_client_headers__authorization
-      - APP_app__api_client_headers__csrf_token
+      - APP_app__headers__cookie=${APP_app__headers__cookie}
+      - APP_app__headers__authorization=${APP_app__headers__authorization}
+      - APP_app__headers__csrf_token=${APP_app__headers__csrf_token}
 
-      - RUST_LOG
-      - OTEL_EXPORTER_OTLP_ENDPOINT
-      - OTEL_EXPORTER_OTLP_HEADERS
-      - OTEL_SERVICE_NAME
-      - OTEL_TRACES_SAMPLER
+      - RUST_LOG=${RUST_LOG}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - OTEL_EXPORTER_OTLP_HEADERS=${OTEL_EXPORTER_OTLP_HEADERS}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME}
+      - OTEL_TRACES_SAMPLER=${OTEL_TRACES_SAMPLER}
     
     restart: unless-stopped
     image: morgan20/pic-scraper-backend
