@@ -21,6 +21,7 @@ pub async fn create_vec_posts(
         MihoyoResponse::request_and_parse(client, &urls.mihoyo),
         BcyResponse::request_and_parse(client, &urls.bcy),
         TwitterHomeResponse::request_and_parse(client, &urls.twitter_home),
+        LofterResponse::request_and_parse_multi(client, LofterResponse::tags(&urls.lofter)),
         LofterResponse::request_and_parse_multi(client, LofterResponse::urls(&urls.lofter)),
     );
     let fut_vec = vec![
