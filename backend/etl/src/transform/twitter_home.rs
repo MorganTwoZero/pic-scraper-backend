@@ -172,9 +172,8 @@ impl From<TwitterHomeResponse> for Vec<Post> {
                 instruction
                     .entries
                     .into_iter()
-                    .filter(|entry| entry.content.is_some())
                     .filter_map(|entry| match entry.content {
-                        Some(content) => {
+                        Some(content) if entry.content.is_some() => {
                             let tweet = match content.item_content.tweet_results.result {
                                 TweetResult::Normal(normal) => normal,
                                 TweetResult::Limited(limited) => limited.tweet,
