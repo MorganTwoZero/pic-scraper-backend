@@ -65,7 +65,7 @@ pub trait DataSource: Into<Vec<Post>> + DeserializeOwned {
 
 #[async_trait]
 pub trait MultiUrlDataSource: DataSource {
-    fn urls(url: &str) -> Vec<String>;
+    fn tags(url: &str) -> Vec<String>;
 
     async fn request_and_parse_multi(
         client: &Client,

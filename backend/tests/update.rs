@@ -19,8 +19,8 @@ async fn test_update_fills_db() {
         fs::read_to_string("assets/json/twitter-home.json").expect("Unable to read the file");
     let twitter_honkai_json =
         fs::read_to_string("assets/json/twitter-honkai.json").expect("Unable to read the file");
-    let lofter_html =
-        fs::read_to_string("assets/json/lofter.htm").expect("Unable to read the file");
+    let lofter_json =
+        fs::read_to_string("assets/json/lofter.json").expect("Unable to read the file");
     let _pixiv_mock = Mock::given(path("/pixiv"))
         .respond_with(ResponseTemplate::new(200).set_body_raw(pixiv_json, "application/json"))
         .expect(1)
@@ -56,7 +56,7 @@ async fn test_update_fills_db() {
         .mount(&app.mock_server)
         .await;
     let _lofter_mock = Mock::given(|req: &Request| req.url.as_str().contains("lofter"))
-        .respond_with(ResponseTemplate::new(200).set_body_raw(lofter_html, "text/plain"))
+        .respond_with(ResponseTemplate::new(200).set_body_raw(lofter_json, "application/json"))
         .expect(7)
         .named("lofter")
         .mount(&app.mock_server)
