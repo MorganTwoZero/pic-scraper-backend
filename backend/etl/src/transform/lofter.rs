@@ -112,7 +112,10 @@ impl MultiUrlDataSource for LofterResponse {
         let responses = join_all(requests).await;
         let mut posts = vec![];
         for res in responses {
-            posts.push(<LofterResponse as Into<Vec<Post>>>::into(res?))
+            match res {
+                Ok(res) => posts.push(<LofterResponse as Into<Vec<Post>>>::into(res)),
+                Err(e) => tracing::error!("{:?}", e),
+            }
         }
         Ok(posts.into_iter().flatten().collect())
     }
@@ -123,16 +126,7 @@ async fn fetch_url(
     client: &reqwest::Client,
     url: String,
 ) -> Result<LofterResponse, reqwest::Error> {
-    client
-        .get(url)
-        .send()
-        .await?
-        .json::<LofterResponse>()
-        .await
-        .map_err(|e| {
-            tracing::error!("{:?}", e);
-            e
-        })
+    client.get(url).send().await?.json::<LofterResponse>().await
 }
 
 /// all blame goes to LLMs
