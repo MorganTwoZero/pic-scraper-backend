@@ -1,3 +1,4 @@
+use futures::future::join_all;
 use reqwest::Client;
 
 use crate::{
@@ -10,30 +11,22 @@ use crate::{
 };
 use config_structs::{BlackList, ScraperState, SourcesUrls};
 
+#[tracing::instrument(skip_all)]
 pub async fn create_vec_posts(
     client: &Client,
     blacklist: &BlackList,
     urls: &SourcesUrls,
 ) -> Vec<Post> {
-    let fut_tuple = futures::join!(
+    let responses = join_all(vec![
         PixivResponse::request_and_parse(client, &urls.pixiv),
         TwitterHonkaiResponse::request_and_parse(client, &urls.twitter_honkai),
         MihoyoResponse::request_and_parse(client, &urls.mihoyo),
         BcyResponse::request_and_parse(client, &urls.bcy),
         TwitterHomeResponse::request_and_parse(client, &urls.twitter_home),
         LofterResponse::request_and_parse_multi(client, LofterResponse::tags(&urls.lofter)),
-        LofterResponse::request_and_parse_multi(client, LofterResponse::urls(&urls.lofter)),
-    );
-    let fut_vec = vec![
-        fut_tuple.0,
-        fut_tuple.1,
-        fut_tuple.2,
-        fut_tuple.3,
-        fut_tuple.4,
-        fut_tuple.5,
-    ];
-
-    fut_vec
+    ])
+    .await;
+    responses
         .into_iter()
         .filter_map(Result::ok)
         .flatten()
