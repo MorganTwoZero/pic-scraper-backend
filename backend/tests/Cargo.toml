@@ -9,7 +9,7 @@ path = "lib.rs"
 
 [dependencies]
 once_cell = "1.19.0"
-reqwest = { version = "0.11.24", default-features = false, features = ["json"] }
+reqwest = { version = "0.11.25", default-features = false, features = ["json"] }
 sqlx = { version = "0.7.3", default-features = false, features = ["runtime-tokio-rustls", "macros", "postgres", "migrate"] }
 tokio = { version = "1.36.0", features = ["macros", "rt"] }
 tracing = { version = "0.1.40", features = ["log"] }
