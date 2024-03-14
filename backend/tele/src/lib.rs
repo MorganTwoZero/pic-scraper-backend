@@ -1,4 +1,4 @@
-use std::{borrow::Cow, net::SocketAddr, str::FromStr, time::Duration};
+use std::{borrow::Cow, net::SocketAddr, time::Duration};
 
 use axum::{
     extract::{ConnectInfo, MatchedPath, OriginalUri},
@@ -7,7 +7,6 @@ use axum::{
 };
 use http::{header, uri::Scheme, HeaderMap, Method, Request, Version};
 use opentelemetry::trace::{TraceContextExt, TraceId};
-use opentelemetry_otlp::WithExportConfig;
 use tower_http::{
     classify::{ServerErrorsAsFailures, ServerErrorsFailureClass, SharedClassifier},
     trace::{MakeSpan, OnBodyChunk, OnEos, OnFailure, OnRequest, OnResponse, TraceLayer},
@@ -157,9 +156,9 @@ fn create_context_with_trace(
 ) -> (opentelemetry::Context, TraceId) {
     if !remote_context.span().span_context().is_valid() {
         // create a fake remote context but with a fresh new trace_id
-        use opentelemetry::sdk::trace::IdGenerator;
-        use opentelemetry::sdk::trace::RandomIdGenerator;
         use opentelemetry::trace::{SpanContext, SpanId};
+        use opentelemetry_sdk::trace::IdGenerator;
+        use opentelemetry_sdk::trace::RandomIdGenerator;
         let trace_id = RandomIdGenerator::default().new_trace_id();
         let new_span_context = SpanContext::new(
             trace_id,
@@ -303,64 +302,29 @@ pub fn setup_telemetry() {
         .init();
 }
 
-fn create_otlp_tracer() -> opentelemetry::sdk::trace::Tracer {
-    let protocol = std::env::var("OTEL_EXPORTER_OTLP_PROTOCOL").unwrap_or("grpc".to_string());
+fn create_otlp_tracer() -> opentelemetry_sdk::trace::Tracer {
+    let exporter = opentelemetry_otlp::new_exporter()
+        .tonic()
+        .with_metadata(metadata_from_env_var())
+        .with_tls_config(Default::default());
 
-    let mut tracer = opentelemetry_otlp::new_pipeline().tracing();
-    let headers = parse_otlp_headers_from_env();
-
-    match protocol.as_str() {
-        "grpc" => {
-            let mut exporter = opentelemetry_otlp::new_exporter()
-                .tonic()
-                .with_metadata(metadata_from_headers(headers))
-                .with_env();
-
-            // Check if we need TLS
-            if let Ok(endpoint) = std::env::var("OTEL_EXPORTER_OTLP_ENDPOINT") {
-                if endpoint.starts_with("https") {
-                    exporter = exporter.with_tls_config(Default::default());
-                }
-            }
-            tracer = tracer.with_exporter(exporter)
-        }
-        "http/protobuf" => {
-            let exporter = opentelemetry_otlp::new_exporter()
-                .http()
-                .with_headers(headers.into_iter().collect())
-                .with_env();
-            tracer = tracer.with_exporter(exporter)
-        }
-        p => panic!("Unsupported protocol {}", p),
-    };
-
-    tracer.install_batch(opentelemetry::runtime::Tokio).unwrap()
+    opentelemetry_otlp::new_pipeline()
+        .tracing()
+        .with_exporter(exporter)
+        .install_batch(opentelemetry_sdk::runtime::Tokio)
+        .unwrap()
 }
 
-fn metadata_from_headers(headers: Vec<(String, String)>) -> tonic::metadata::MetadataMap {
+fn metadata_from_env_var() -> tonic::metadata::MetadataMap {
     use tonic::metadata;
 
     let mut metadata = metadata::MetadataMap::new();
-    headers.into_iter().for_each(|(name, value)| {
-        let value = value
-            .parse::<metadata::MetadataValue<metadata::Ascii>>()
-            .expect("Header value invalid");
-        metadata.insert(metadata::MetadataKey::from_str(&name).unwrap(), value);
-    });
+    metadata.insert(
+        "x-honeycomb-team",
+        std::env::var("HONEYCOMB_API_KEY")
+            .expect("HONEYCOMB_API_KEY env var wasn't found or contains invalid characters")
+            .parse()
+            .expect("Failed to parse HONEYCOMB_API_KEY env var"),
+    );
     metadata
-}
-
-fn parse_otlp_headers_from_env() -> Vec<(String, String)> {
-    let mut headers = Vec::new();
-
-    if let Ok(hdrs) = std::env::var("OTEL_EXPORTER_OTLP_HEADERS") {
-        hdrs.split(',')
-            .map(|header| {
-                header
-                    .split_once('=')
-                    .expect("Header should contain '=' character")
-            })
-            .for_each(|(name, value)| headers.push((name.to_owned(), value.to_owned())));
-    }
-    headers
 }
