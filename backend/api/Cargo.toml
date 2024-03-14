@@ -12,17 +12,17 @@ path = "src/main.rs"
 name = "api"
 
 [dependencies]
-anyhow = "1.0.80"
+anyhow = "1.0.81"
 async-trait = "0.1.77"
 axum = { version = "0.7.4", features = ["tracing"] }
-chrono = { version = "0.4.34", default-features = false, features = ["std"] }
+chrono = { version = "0.4.35", default-features = false, features = ["std"] }
 config = "0.14.0"
 dotenvy = "0.15.7"
 futures = "0.3.30"
 futures-util = "0.3.30"
 hyper = "1.2.0"
 regex = "1.10.3"
-reqwest = { version = "0.11.24", default-features = false, features = [
+reqwest = { version = "0.11.26", default-features = false, features = [
     "json",
     "rustls-tls",
     "stream",
@@ -31,7 +31,7 @@ secrecy = { version = "0.8.0", features = ["serde"] }
 serde = { version = "1.0.197", features = ["derive"] }
 serde_json = "1.0.114"
 serde-aux = { version = "4.5.0", default-features = false }
-thiserror = "1.0.57"
+thiserror = "1.0.58"
 tokio = { version = "1.36.0", features = ["macros", "rt"] }
 tower-http = { version = "0.5.2", features = ["trace", "fs"] }
 tracing = { version = "0.1.40", features = ["log"] }
@@ -50,11 +50,11 @@ version = "1.7.0"
 features = ["v4", "fast-rng", "macro-diagnostics", "serde"]
 
 [dependencies.sqlx]
-version = "0.7.3"
+version = "0.7.4"
 default-features = false
 features = ["runtime-tokio-rustls", "macros", "postgres", "migrate"]
 
 [dev-dependencies]
 once_cell = "1.19.0"
-serde_path_to_error = "0.1.15"
+serde_path_to_error = "0.1.16"
 wiremock = "0.6.0"

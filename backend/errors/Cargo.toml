@@ -6,15 +6,15 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.80"
+anyhow = "1.0.81"
 axum = { version = "0.7.4" }
 delay_timer = "0.11.5"
-reqwest = { version = "0.11.24", default-features = false }
+reqwest = { version = "0.11.26", default-features = false }
 serde = { version = "1.0.197", default-features = false }
 serde-aux = { version = "4.5.0", default-features = false }
-thiserror = "1.0.57"
+thiserror = "1.0.58"
 tracing = { version = "0.1.40", default-features = false }
 
 [dependencies.sqlx]
-version = "0.7.3"
+version = "0.7.4"
 default-features = false
