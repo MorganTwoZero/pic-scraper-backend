@@ -46,16 +46,17 @@ pub struct Post {
 pub trait DataSource: Into<Vec<Post>> + DeserializeOwned {
     fn url() -> &'static str;
 
+    #[tracing::instrument(skip(client))]
     async fn request_and_parse(client: &Client, url: &str) -> Result<Vec<Post>, Error> {
         let response = client.get(url).send().await.map_err(|e| {
-            tracing::warn!("Failed to make a request. Error: {}. URL: {}", e, url);
+            tracing::error!("Failed to make a request. Error: {}. URL: {}", e, url);
             e
         })?;
         let parsed = response
             .json::<Self>()
             .await
             .map_err(|e| {
-                tracing::warn!("Failed to parse a response. Error: {}. URL: {}", e, url);
+                tracing::error!("Failed to parse a response. Error: {}. URL: {}", e, url);
                 e
             })?
             .into();
