@@ -121,7 +121,7 @@ impl MultiUrlDataSource for LofterResponse {
     }
 }
 
-#[tracing::instrument(skip(client))]
+#[tracing::instrument(skip(client), level = "trace")]
 async fn fetch_url(
     client: &reqwest::Client,
     url: String,
