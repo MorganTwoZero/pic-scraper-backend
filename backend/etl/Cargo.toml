@@ -8,7 +8,7 @@ path = "src/main.rs"
 name = "scraper"
 
 [dependencies]
-anyhow = "1.0.80"
+anyhow = "1.0.81"
 async-trait = "0.1.77"
 axum = { version = "0.7.4", default-features = false }
 axum-extra = { version = "0.9.2", features = ["typed-header"] }
@@ -18,11 +18,11 @@ delay_timer = "0.11.5"
 dotenvy = "0.15.7"
 futures = "0.3.30"
 hyper = "1.2.0"
-reqwest = { version = "0.11.24", default-features = false, features = ["json"] }
+reqwest = { version = "0.11.26", default-features = false, features = ["json"] }
 secrecy = { version = "0.8.0", features = ["serde"] }
 serde = { version = "1.0.197", features = ["derive"] }
 serde_json = "1.0.114"
-sqlx = { version = "0.7.3", default-features = false, features = ["postgres", "macros", "runtime-tokio-rustls", "chrono"] }
+sqlx = { version = "0.7.4", default-features = false, features = ["postgres", "macros", "runtime-tokio-rustls", "chrono"] }
 tokio = { version = "1.36.0", features = ["macros", "rt"] }
 tracing = { version = "0.1.40", features = ["log"] }
 
@@ -33,4 +33,4 @@ errors = { path = "../errors" }
 tele = { path = "../tele" }
 
 [dev-dependencies]
-serde_path_to_error = "0.1.15"
+serde_path_to_error = "0.1.16"
