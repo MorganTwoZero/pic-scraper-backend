@@ -91,8 +91,7 @@ impl Application {
             .route("/en/artworks/:path/:pic_num", get(embed))
             .nest_service("/", serve_dir.clone())
             .fallback_service(serve_dir)
-            // TODO
-            // .layer(tele::opentelemetry_tracing_layer())
+            .layer(tele::opentelemetry_tracing_layer())
             .with_state(state)
     }
 
