@@ -23,6 +23,7 @@ services:
       - APP_app__headers__authorization=${APP_app__headers__authorization}
       - APP_app__headers__csrf_token=${APP_app__headers__csrf_token}
       - RUST_LOG=${RUST_LOG}
+      - HONEYCOMB_API_KEY=${HONEYCOMB_API_KEY}
     build: .
     command: /api
     volumes:
@@ -41,6 +42,7 @@ services:
       - APP_app__headers__authorization=${APP_app__headers__authorization}
       - APP_app__headers__csrf_token=${APP_app__headers__csrf_token}
       - RUST_LOG=${RUST_LOG}
+      - HONEYCOMB_API_KEY=${HONEYCOMB_API_KEY}
     build: .
     command: /scraper
     volumes:
