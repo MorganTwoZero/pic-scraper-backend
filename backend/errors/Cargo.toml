@@ -11,7 +11,6 @@ axum = { version = "0.7.4" }
 delay_timer = "0.11.5"
 reqwest = { version = "0.11.26", default-features = false }
 serde = { version = "1.0.197", default-features = false }
-serde-aux = { version = "4.5.0", default-features = false }
 thiserror = "1.0.58"
 tracing = { version = "0.1.40", default-features = false }
 
