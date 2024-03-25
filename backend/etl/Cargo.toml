@@ -14,7 +14,7 @@ axum = { version = "0.7.4", default-features = false }
 chrono = { version = "0.4.35", default-features = false, features = ["std"] }
 delay_timer = "0.11.5"
 futures = "0.3.30"
-reqwest = { version = "0.11.26", default-features = false, features = ["json"] }
+reqwest = { version = "0.12.2", default-features = false, features = ["json"] }
 secrecy = { version = "0.8.0", features = ["serde"] }
 serde = { version = "1.0.197", features = ["derive"] }
 serde_json = "1.0.114"

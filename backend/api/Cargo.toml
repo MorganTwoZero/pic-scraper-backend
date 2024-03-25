@@ -15,7 +15,7 @@ name = "api"
 anyhow = "1.0.81"
 axum = { version = "0.7.4", features = ["tracing"] }
 chrono = { version = "0.4.35", default-features = false, features = ["std"] }
-reqwest = { version = "0.11.26", default-features = false, features = [
+reqwest = { version = "0.12.2", default-features = false, features = [
     "json",
     "rustls-tls",
     "stream",
