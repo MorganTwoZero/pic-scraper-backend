@@ -9,7 +9,7 @@ name = "scraper"
 
 [dependencies]
 anyhow = "1.0.81"
-async-trait = "0.1.77"
+async-trait = "0.1.79"
 axum = { version = "0.7.4", default-features = false }
 chrono = { version = "0.4.35", default-features = false, features = ["std"] }
 delay_timer = "0.11.5"
