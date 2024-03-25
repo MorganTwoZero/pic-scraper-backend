@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-axum = { version = "0.7.4", features = [ "matched-path", "original-uri", "tokio" ] }
+axum = { version = "0.7.5", features = [ "matched-path", "original-uri", "tokio" ] }
 opentelemetry = { version = "0.22.0", default-features = false}
 opentelemetry-otlp = { version = "0.15.0", features = ["reqwest-client", "reqwest-rustls", "http-proto", "tls"] }
 opentelemetry_sdk = { version = "0.22", default-features = false, features = ["rt-tokio"] }

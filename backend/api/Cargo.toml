@@ -13,7 +13,7 @@ name = "api"
 
 [dependencies]
 anyhow = "1.0.81"
-axum = { version = "0.7.4", features = ["tracing"] }
+axum = { version = "0.7.5", features = ["tracing"] }
 chrono = { version = "0.4.35", default-features = false, features = ["std"] }
 reqwest = { version = "0.11.26", default-features = false, features = [
     "json",
