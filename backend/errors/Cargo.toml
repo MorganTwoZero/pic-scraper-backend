@@ -6,14 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.81"
-axum = { version = "0.7.4" }
-delay_timer = "0.11.5"
-reqwest = { version = "0.11.26", default-features = false }
-serde = { version = "1.0.197", default-features = false }
-thiserror = "1.0.58"
-tracing = { version = "0.1.40", default-features = false }
-
-[dependencies.sqlx]
-version = "0.7.4"
-default-features = false
+anyhow = { workspace = true }
+axum = { workspace = true, features = ["json"] }
+delay_timer = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+sqlx = { workspace = true }

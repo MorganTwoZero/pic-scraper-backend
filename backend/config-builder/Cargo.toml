@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-config = "0.14.0"
-dotenvy = "0.15.7"
+config = { workspace = true }
+dotenvy = { workspace = true }
 
 # local deps
 config-structs = { path = "../config-structs" }

@@ -8,19 +8,19 @@ path = "src/main.rs"
 name = "scraper"
 
 [dependencies]
-anyhow = "1.0.81"
-async-trait = "0.1.77"
-axum = { version = "0.7.4", default-features = false }
-chrono = { version = "0.4.35", default-features = false, features = ["std"] }
-delay_timer = "0.11.5"
-futures = "0.3.30"
-reqwest = { version = "0.11.26", default-features = false, features = ["json"] }
-secrecy = { version = "0.8.0", features = ["serde"] }
-serde = { version = "1.0.197", features = ["derive"] }
-serde_json = "1.0.114"
-sqlx = { version = "0.7.4", default-features = false, features = ["postgres", "macros", "runtime-tokio-rustls", "chrono"] }
-tokio = { version = "1.36.0", features = ["macros", "rt"] }
-tracing = { version = "0.1.40", features = ["log"] }
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+axum = { workspace = true }
+chrono = { workspace = true, features = ["std"] }
+delay_timer = { workspace = true }
+futures = { workspace = true }
+reqwest = { workspace = true, features = ["json"] }
+secrecy = { workspace = true, features = ["serde"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+sqlx = { workspace = true, features = ["postgres", "macros", "runtime-tokio-rustls", "chrono"] }
+tokio = { workspace = true, features = ["macros", "rt"] }
+tracing = { workspace = true, features = ["log"] }
 
 # local deps
 config-builder = { path = "../config-builder" }
@@ -29,4 +29,4 @@ errors = { path = "../errors" }
 tele = { path = "../tele" }
 
 [dev-dependencies]
-serde_path_to_error = "0.1.16"
+serde_path_to_error = { workspace = true }
