@@ -12,20 +12,16 @@ path = "src/main.rs"
 name = "api"
 
 [dependencies]
-anyhow = "1.0.81"
-axum = { version = "0.7.4", features = ["tracing"] }
-chrono = { version = "0.4.35", default-features = false, features = ["std"] }
-reqwest = { version = "0.11.26", default-features = false, features = [
-    "json",
-    "rustls-tls",
-    "stream",
-] }
-secrecy = { version = "0.8.0", features = ["serde"] }
-serde = { version = "1.0.197", features = ["derive"] }
-serde_json = "1.0.114"
-tokio = { version = "1.36.0", features = ["macros", "rt"] }
-tower-http = { version = "0.5.2", features = ["trace", "fs"] }
-tracing = { version = "0.1.40", features = ["log"] }
+anyhow = { workspace = true }
+axum = { workspace = true, features = ["tracing", "tokio", "http1", "http2"] }
+chrono = { workspace = true, features = ["std"] }
+reqwest = { workspace = true, features = ["json", "rustls-tls", "stream"] }
+secrecy = { workspace = true, features = ["serde"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt"] }
+tower-http = { workspace = true, features = ["trace", "fs"] }
+tracing = { workspace = true, features = ["log"] }
 
 # local deps
 config-builder = { path = "../config-builder" }
@@ -34,13 +30,9 @@ embed = { path = "../embed" }
 errors = { path = "../errors" }
 etl = { path = "../etl" }
 tele = { path = "../tele" }
-
-[dependencies.sqlx]
-version = "0.7.4"
-default-features = false
-features = ["runtime-tokio-rustls", "macros", "postgres", "migrate"]
+sqlx = { workspace = true, features = ["runtime-tokio-rustls", "macros", "postgres", "migrate"] }
 
 [dev-dependencies]
-once_cell = "1.19.0"
-serde_path_to_error = "0.1.16"
-wiremock = "0.6.0"
+once_cell = { workspace = true }
+serde_path_to_error = { workspace = true }
+wiremock = { workspace = true }

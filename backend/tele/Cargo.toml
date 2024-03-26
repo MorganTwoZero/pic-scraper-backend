@@ -6,12 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-axum = { version = "0.7.4", features = [ "matched-path", "original-uri", "tokio" ] }
-opentelemetry = { version = "0.22.0", default-features = false}
-opentelemetry-otlp = { version = "0.15.0", features = ["reqwest-client", "reqwest-rustls", "http-proto", "tls"] }
-opentelemetry_sdk = { version = "0.22", default-features = false, features = ["rt-tokio"] }
-tonic = { version = "0.11.0", features = ["tls", "tls-roots"] }
-tower-http = { version = "0.5.2", features = ["trace", "fs"] }
-tracing = { version = "0.1.40", features = ["log"] }
-tracing-opentelemetry = "0.23.0"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter", "json"] }
+axum = { workspace = true, features = ["matched-path", "original-uri", "tokio"] }
+opentelemetry = { workspace = true }
+opentelemetry-otlp = { workspace = true, features = ["reqwest-client", "reqwest-rustls", "http-proto", "tls"] }
+opentelemetry_sdk = { workspace = true, features = ["rt-tokio"] }
+tonic = { workspace = true, features = ["tls", "tls-roots"] }
+tower-http = { workspace = true, features = ["trace", "fs"] }
+tracing = { workspace = true, features = ["log"] }
+tracing-opentelemetry = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
