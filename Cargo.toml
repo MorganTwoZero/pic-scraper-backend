@@ -18,7 +18,7 @@ opentelemetry = { version = "0.22.0", default-features = false }
 opentelemetry-otlp = "0.15.0"
 opentelemetry_sdk = { version = "0.22", default-features = false }
 regex = "1.10.4"
-reqwest = { version = "0.12.2", default-features = false }
+reqwest = { version = "0.12.3", default-features = false }
 secrecy = "0.8.0"
 serde = { version = "1.0.197", default-features = false }
 serde-aux = { version = "4.5.0", default-features = false }
