@@ -1,11 +1,9 @@
-mod bcy;
 mod lofter;
 mod mihoyo_bbs;
 mod pixiv;
 mod twitter_home;
 mod twitter_honkai;
 
-pub use bcy::BcyResponse;
 pub use lofter::LofterResponse;
 pub use mihoyo_bbs::MihoyoResponse;
 pub use pixiv::PixivResponse;
@@ -24,7 +22,6 @@ pub enum PostSource {
     Twitter,
     Mihoyo,
     Pixiv,
-    Bcy,
     Lofter,
     TwitterHome,
 }

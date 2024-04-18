@@ -70,7 +70,6 @@ pub async fn spawn_api() -> TestApi {
         pixiv: format!("{}/pixiv", mock_server.uri()),
         pixiv_details: format!("{}/pixiv_details", mock_server.uri()),
         pixiv_image: format!("{}/pixiv_image", mock_server.uri()),
-        bcy: format!("{}/bcy", mock_server.uri()),
         twitter_home: format!("{}/twitter_home", mock_server.uri()),
         twitter_honkai: format!("{}/twitter_honkai", mock_server.uri()),
         mihoyo: format!("{}/mihoyo", mock_server.uri()),
