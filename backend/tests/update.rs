@@ -12,7 +12,6 @@ async fn test_update_fills_db() {
     let app = spawn_api().await;
 
     let pixiv_json = fs::read_to_string("assets/json/pixiv.json").expect("Unable to read the file");
-    let bcy_json = fs::read_to_string("assets/json/bcy.json").expect("Unable to read the file");
     let mihoyo_json =
         fs::read_to_string("assets/json/mihoyo.json").expect("Unable to read the file");
     let twitter_home_json =
@@ -25,12 +24,6 @@ async fn test_update_fills_db() {
         .respond_with(ResponseTemplate::new(200).set_body_raw(pixiv_json, "application/json"))
         .expect(1)
         .named("pixiv")
-        .mount(&app.mock_server)
-        .await;
-    let _bcy_mock = Mock::given(path("/bcy"))
-        .respond_with(ResponseTemplate::new(200).set_body_raw(bcy_json, "application/json"))
-        .expect(1)
-        .named("bcy")
         .mount(&app.mock_server)
         .await;
     let _mihoyo_mock = Mock::given(path("/mihoyo"))
