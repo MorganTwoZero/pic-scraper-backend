@@ -90,7 +90,7 @@ dependencies = [
  "errors",
  "etl",
  "once_cell",
- "reqwest 0.12.3",
+ "reqwest 0.12.4",
  "secrecy",
  "serde",
  "serde_json",
@@ -619,7 +619,7 @@ dependencies = [
 name = "config-structs"
 version = "0.1.0"
 dependencies = [
- "reqwest 0.12.3",
+ "reqwest 0.12.4",
  "secrecy",
  "serde",
  "serde-aux",
@@ -873,7 +873,7 @@ dependencies = [
  "errors",
  "hyper 1.3.1",
  "regex",
- "reqwest 0.12.3",
+ "reqwest 0.12.4",
  "serde",
  "serde_json",
  "tracing",
@@ -911,7 +911,7 @@ dependencies = [
  "anyhow",
  "axum 0.7.5",
  "delay_timer",
- "reqwest 0.12.3",
+ "reqwest 0.12.4",
  "serde",
  "sqlx",
  "thiserror",
@@ -942,7 +942,7 @@ dependencies = [
  "delay_timer",
  "errors",
  "futures",
- "reqwest 0.12.3",
+ "reqwest 0.12.4",
  "secrecy",
  "serde",
  "serde_json",
@@ -2417,9 +2417,9 @@ dependencies = [
 
 [[package]]
 name = "reqwest"
-version = "0.12.3"
+version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e6cc1e89e689536eb5aeede61520e874df5a4707df811cd5da4aa5fbb2aae19"
+checksum = "566cafdd92868e0939d3fb961bd0dc25fcfaaed179291093b3d43e6b3150ea10"
 dependencies = [
  "base64 0.22.0",
  "bytes",
@@ -3264,7 +3264,7 @@ dependencies = [
  "config-structs",
  "etl",
  "once_cell",
- "reqwest 0.12.3",
+ "reqwest 0.12.4",
  "sqlx",
  "tokio",
  "tracing",
