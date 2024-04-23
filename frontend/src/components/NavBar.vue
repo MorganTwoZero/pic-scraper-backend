@@ -1,5 +1,5 @@
 <template>
-  <nav @click="collapseNavBar" class="navbar navbar-expand-sm navbar-light fixed-top bg-light">
+  <nav @click="collapseNavBar" class="navbar navbar-expand-sm navbar-light top bg-light">
     <div class="container">
       <a class="navbar-brand" href="/">Honkai Pic Scraper</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
