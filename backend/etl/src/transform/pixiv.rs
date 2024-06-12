@@ -57,11 +57,7 @@ impl From<PixivResponse> for Vec<Post> {
     }
 }
 
-impl DataSource for PixivResponse {
-    fn url() -> &'static str {
-        "https://www.pixiv.net/touch/ajax/search/illusts?include_meta=1&type=illust_and_ugoira&word=崩坏3rd OR 崩壊3rd OR 崩坏3 OR 崩壞3rd OR honkaiimpact3rd OR 붕괴3 OR 붕괴3rd OR 崩坏学园 OR 崩壊学園 OR 崩坏 OR 崩坏三 OR リタ・ロスヴァイセ OR 琪亚娜 OR 符华 OR フカ OR 希儿&s_mode=s_tag_full&lang=en"
-    }
-}
+impl DataSource for PixivResponse {}
 
 #[cfg(test)]
 mod tests {

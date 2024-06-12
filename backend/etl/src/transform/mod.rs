@@ -41,8 +41,6 @@ pub struct Post {
 
 #[async_trait]
 pub trait DataSource: Into<Vec<Post>> + DeserializeOwned {
-    fn url() -> &'static str;
-
     #[tracing::instrument(skip(client), level = "trace")]
     async fn request_and_parse(client: &Client, url: &str) -> Result<Vec<Post>, Error> {
         let response = client.get(url).send().await.map_err(|e| {

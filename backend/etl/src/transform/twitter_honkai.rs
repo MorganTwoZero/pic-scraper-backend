@@ -210,11 +210,7 @@ impl From<TwitterHonkaiResponse> for Vec<Post> {
     }
 }
 
-impl DataSource for TwitterHonkaiResponse {
-    fn url() -> &'static str {
-        "https://api.twitter.com/1.1/search/tweets.json?result_type=recent&count=100&q=%23%E7%AC%A6%E5%8D%8E%20OR%20%23%E5%B4%A9%E5%9D%8F3%20OR%20%23%E3%83%95%E3%82%AB%20OR%20%23%E5%B4%A9%E5%9D%8F3rd%20OR%20%23%E5%B4%A9%E5%A3%9E3rd%20OR%20%23%EB%B6%95%EA%B4%B43rd%20OR%20%23Honkaiimpact3rd%20OR%20%23%E5%B4%A9%E5%A3%8A3rd%20min_faves%3A2"
-    }
-}
+impl DataSource for TwitterHonkaiResponse {}
 
 #[cfg(test)]
 mod tests {

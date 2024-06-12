@@ -74,11 +74,7 @@ enum Tag {
     雷电芽衣,
 }
 
-impl DataSource for LofterResponse {
-    fn url() -> &'static str {
-        "https://rsshub.app/lofter/tag/"
-    }
-}
+impl DataSource for LofterResponse {}
 
 #[async_trait]
 impl MultiUrlDataSource for LofterResponse {
