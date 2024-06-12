@@ -52,14 +52,14 @@ function toClipboard(e) {
         e.preventDefault();
         let text = '';
         if (post.post.post_link.startsWith('https://twitter.com/')) {
-            text = `<${post.post.post_link}> ${post.post.preview_link}?name=orig`;
+            text = post.post.post_link.replace('twitter', 'fxtwitter');
         } else if (post.post.post_link.startsWith('https://www.pixiv.net')) {
-            text = post.post.post_link.replace('net', 'sbs');
+            text = post.post.post_link.replace('pixiv', 'phixiv');
         } else if (post.post.post_link.search("lofter") != -1) {
-            text = `${post.post.post_link} ${post.post.clipboard_link.replace(/\?.*/, '')}`;
+            text = `${post.post.post_link} [.](${post.post.clipboard_link.replace(/\?.*/, '')})`;
         } else {
             /* Delete everything after '?.' */
-            text = `<${post.post.post_link}> ${post.post.preview_link.replace(/\?.*/, '')}`;
+            text = `<${post.post.post_link}> [.](${post.post.preview_link.replace(/\?.*/, '')})`;
         }
         navigator.clipboard.writeText(text);
 }
