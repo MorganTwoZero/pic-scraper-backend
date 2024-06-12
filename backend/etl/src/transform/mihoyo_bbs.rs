@@ -72,11 +72,7 @@ impl From<MihoyoResponse> for Vec<Post> {
     }
 }
 
-impl DataSource for MihoyoResponse {
-    fn url() -> &'static str {
-        "https://bbs-api.mihoyo.com/post/wapi/getForumPostList?forum_id=4&gids=1&is_good=false&is_hot=false&page_size=20&sort_type=2"
-    }
-}
+impl DataSource for MihoyoResponse {}
 
 #[cfg(test)]
 mod tests {
