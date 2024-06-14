@@ -207,4 +207,4 @@ jobs:
         KEY: ${{ secrets.SSHKEY }}
         script: |
           cd pic-scraper-backend
-          docker compose up -d --pull always
+          /home/morgan20/bin/docker compose up -d --pull always
