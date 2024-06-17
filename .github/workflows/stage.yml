@@ -208,4 +208,4 @@ jobs:
         KEY: ${{ secrets.SSHKEY }}
         script: |
           cd pic-scraper-backend-stage
-          /home/morgan20/bin/docker compose -f docker-compose.stage.yml up -d --pull always
+          docker compose -f docker-compose.stage.yml up -d --pull always
