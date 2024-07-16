@@ -197,6 +197,7 @@ jobs:
         HOST: ${{ secrets.HOST }}
         USERNAME: ${{ secrets.USERNAME }}
         KEY: ${{ secrets.SSHKEY }}
+        port: 44123
         source: "docker-compose.stage.yml, ./backend/migrations, ./config"
         target: "pic-scraper-backend-stage"
 
@@ -206,6 +207,7 @@ jobs:
         host: ${{ secrets.HOST }}
         USERNAME: ${{ secrets.USERNAME }}
         KEY: ${{ secrets.SSHKEY }}
+        port: 44123
         script: |
           cd pic-scraper-backend-stage
           docker compose -f docker-compose.stage.yml up -d --pull always
