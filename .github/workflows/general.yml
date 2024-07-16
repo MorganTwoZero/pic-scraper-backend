@@ -196,6 +196,7 @@ jobs:
         HOST: ${{ secrets.HOST }}
         USERNAME: ${{ secrets.USERNAME }}
         KEY: ${{ secrets.SSHKEY }}
+        port: 44123
         source: "docker-compose.yml, ./backend/migrations, ./config"
         target: "pic-scraper-backend"
 
@@ -205,6 +206,7 @@ jobs:
         host: ${{ secrets.HOST }}
         USERNAME: ${{ secrets.USERNAME }}
         KEY: ${{ secrets.SSHKEY }}
+        port: 44123
         script: |
           cd pic-scraper-backend
           docker compose up -d --pull always
