@@ -25,8 +25,8 @@ serde-aux = { version = "4.5.0", default-features = false }
 serde_json = "1.0.120"
 serde_path_to_error = "0.1.16"
 sqlx = { version = "0.7.4", default-features = false }
-thiserror = "1.0.61"
-tokio = "1.38.0"
+thiserror = "1.0.62"
+tokio = "1.38.1"
 tonic = "0.11.0"
 tower-http = "0.5.2"
 tracing = { version = "0.1.40", default-features = false }
