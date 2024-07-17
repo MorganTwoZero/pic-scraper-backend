@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use chrono::DateTime;
-use serde::{Deserialize, Deserializer};
+use serde::Deserialize;
 
 use crate::{
     transform::{Post, PostSource},
@@ -34,32 +34,31 @@ pub struct Instruction {
     pub entries: Vec<Entry>,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Entry {
     pub entry_id: String,
-    pub content: Option<Content>,
-}
-
-impl<'de> Deserialize<'de> for Entry {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let json: serde_json::Value = serde_json::Value::deserialize(deserializer)?;
-        let entry_id = json["entryId"].as_str().unwrap().to_owned();
-
-        let content = match entry_id.starts_with("tweet") {
-            true => Some(serde_json::from_value::<Content>(json["content"].clone()).unwrap()),
-            false => None,
-        };
-
-        Ok(Entry { entry_id, content })
-    }
+    pub content: Content,
 }
 
 #[derive(Deserialize)]
-pub struct Content {
-    #[serde(rename = "itemContent")]
-    pub item_content: ItemContent,
+#[serde(untagged)]
+pub enum Content {
+    SingleTweet(SingleTweet),
+    Conversation { items: Vec<ConversationItem> },
+    Cursor { value: String },
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SingleTweet {
+    item_content: ItemContent,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ConversationItem {
+    item: SingleTweet,
 }
 
 #[derive(Deserialize)]
@@ -172,22 +171,31 @@ impl From<TwitterHomeResponse> for Vec<Post> {
                 instruction
                     .entries
                     .into_iter()
-                    .filter_map(|entry| match entry.content {
-                        Some(content) if entry.content.is_some() => {
-                            let tweet = match content.item_content.tweet_results.result {
-                                TweetResult::Normal(normal) => normal,
-                                TweetResult::Limited(limited) => limited.tweet,
-                            };
-                            if tweet.legacy.entities.media.is_some() {
-                                Post::try_from(tweet).ok()
-                            } else {
-                                None
-                            }
-                        }
-                        _ => None,
+                    .filter(|e| !e.entry_id.starts_with("promo"))
+                    .flat_map(|entry| match entry.content {
+                        Content::SingleTweet(tweet) => vec![process_tweet(tweet)],
+                        Content::Conversation { items } => items
+                            .into_iter()
+                            .map(|item| process_tweet(item.item))
+                            .collect::<Vec<_>>(),
+                        Content::Cursor { value: _ } => vec![None],
                     })
             })
+            .flatten()
+            .filter_map(Some)
             .collect()
+    }
+}
+
+fn process_tweet(tweet: SingleTweet) -> Option<Post> {
+    let tweet = match tweet.item_content.tweet_results.result {
+        TweetResult::Normal(normal) => normal,
+        TweetResult::Limited(limited) => limited.tweet,
+    };
+    if tweet.legacy.entities.media.is_some() {
+        Post::try_from(tweet).ok()
+    } else {
+        None
     }
 }
 
