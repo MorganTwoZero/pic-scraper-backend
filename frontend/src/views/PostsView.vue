@@ -50,7 +50,8 @@ async function getPosts() {
       if (response.data.length === 0) {
         nextPage = false;
       } else {
-        posts.value.push(...response.data);
+        let filtered = filterObjects(response.data, getListFromLocalStorage());
+        posts.value.push(...filtered);
         page += 1;
       }
     } catch (error) {
@@ -59,6 +60,17 @@ async function getPosts() {
       isLoading = false;
     }
   }
+}
+
+function getListFromLocalStorage() {
+  const storedList = localStorage.getItem('filterList');
+  return storedList ? JSON.parse(storedList) : [];
+}
+
+function filterObjects(objects, filterList) {
+  return objects.filter(obj => 
+    !filterList.some(item => Object.values(obj).includes(item))
+  );
 }
 
 function handleObserver(entries) {
