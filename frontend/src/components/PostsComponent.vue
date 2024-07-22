@@ -44,6 +44,10 @@ function LofterLink(post) {
     post.post.author_profile_image = `${import.meta.env.VITE_APP_BACKEND_URL}/jpg?url=` + post.post.author_profile_image
 }
 
+function LofterAuthorLink(post) {
+    post.post.author_link = `https://www.lofter.com/front/blog/home-page/${post.post.author_link.match(/https:\/\/(.+?)\.lofter\.com/)[1]}`;
+}
+
 const created = computed(() => {
     return new Date(post.post.created).toLocaleTimeString('ru');
 });
@@ -70,7 +74,8 @@ onBeforeMount(() => {
     }
 
     if (post.post.post_link.search("lofter") != -1) {
-        LofterLink(post)
+        LofterLink(post);
+        LofterAuthorLink(post);
     }
 })
 </script>
