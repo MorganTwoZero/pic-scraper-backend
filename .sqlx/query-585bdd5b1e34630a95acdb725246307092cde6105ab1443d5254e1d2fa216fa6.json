@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n            post_link,\n            preview_link,\n            images_number,\n            created,\n            author,\n            author_link,\n            source AS \"source!: PostSource\",\n            tags,\n            author_profile_image\n        FROM honkai_posts\n        WHERE source = 'twitterhome'\n        ORDER BY created DESC\n        LIMIT 20 OFFSET $1",
+  "query": "SELECT\n            post_link,\n            preview_link,\n            images_number,\n            created,\n            author,\n            author_link,\n            source AS \"source!: PostSource\",\n            tags,\n            author_profile_image\n        FROM honkai_posts\n        WHERE source = 'twitterhome'\n        ORDER BY id DESC\n        LIMIT 20 OFFSET $1",
   "describe": {
     "columns": [
       {
@@ -80,5 +80,5 @@
       true
     ]
   },
-  "hash": "2e5d06c17760d8e2b3f6a668b1e535d0450e10770373139f23993d2f83a68b16"
+  "hash": "585bdd5b1e34630a95acdb725246307092cde6105ab1443d5254e1d2fa216fa6"
 }
