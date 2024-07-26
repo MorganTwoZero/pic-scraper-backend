@@ -199,7 +199,7 @@ pub struct OtelOnResponse;
 impl<B> OnResponse<B> for OtelOnResponse {
     fn on_response(self, response: &Response<B>, _latency: Duration, span: &Span) {
         let status = response.status().as_u16().to_string();
-        span.record("http.status_code", &tracing::field::display(status));
+        span.record("http.status_code", tracing::field::display(status));
 
         // assume there is no error, if there is `OtelOnFailure` will be called and override this
         span.record("otel.status_code", "OK");
