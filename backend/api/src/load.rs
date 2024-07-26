@@ -33,7 +33,7 @@ pub async fn load_honkai_posts(
             author_profile_image
         FROM honkai_posts
         WHERE source != 'twitterhome'
-        ORDER BY created DESC
+        ORDER BY id DESC
         LIMIT 20 OFFSET $1"#,
             page.page * 20
         )
@@ -62,7 +62,7 @@ pub async fn load_twitter_home_posts(
             author_profile_image
         FROM honkai_posts
         WHERE source = 'twitterhome'
-        ORDER BY created DESC
+        ORDER BY id DESC
         LIMIT 20 OFFSET $1"#,
             page.page * 20
         )
