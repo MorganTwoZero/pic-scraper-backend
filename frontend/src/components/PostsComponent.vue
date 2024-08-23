@@ -1,5 +1,5 @@
 <template>
-    <a @click="toClipboard" class="image" :href="post.post.post_link">
+    <a @keydown.l="like" @click.prevent="toClipboard" class="image" :href="post.post.post_link">
         <img class="preview_link" :src="post.post.preview_link">
         <div class="counter_wrapper">
             <div class="images_count">
@@ -13,17 +13,36 @@
             {{ post.post.author }}
         </a>
         {{ created }}
-    </div>
-
-    <div>
-    <LikeButton :post_link="post.post.post_link" />
+        <button
+            ref="likeButtonRef"
+            @click.prevent="like"
+            class="btn btn-primary"
+            v-if="post.post.post_link.includes('twitter.com')">
+        🤍
+        </button>
     </div>
 </template>
 
 <script setup>
-import { computed, defineProps, onBeforeMount } from 'vue'
+import { computed, onBeforeMount, ref } from 'vue'
+import axios from 'axios';
 
-import LikeButton from './LikeButton.vue';
+const likeButtonRef = ref();
+function like() {
+    likeButtonRef.value.disabled = true;
+    likeButtonRef.value.blur();
+    axios.get('/like', {
+        params: {
+            post_link: post.post.post_link
+        }
+    }).then((response) => {
+        likeButtonRef.value.classList.add('btn-success')
+    })
+    .catch((error) => {
+        likeButtonRef.value.innerText = error
+        likeButtonRef.value.classList.add('btn-danger')
+    })
+}
 
 const post = defineProps({
     post: {
