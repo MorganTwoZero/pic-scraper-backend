@@ -11,6 +11,7 @@ name = "scraper"
 anyhow = { workspace = true }
 async-trait = { workspace = true }
 axum = { workspace = true }
+backon = { workspace = true }
 chrono = { workspace = true, features = ["std"] }
 delay_timer = { workspace = true }
 futures = { workspace = true }
