@@ -12,7 +12,10 @@ pub use twitter_home::TwitterHomeResponse;
 pub use twitter_honkai::TwitterHonkaiResponse;
 
 use async_trait::async_trait;
+use backon::ExponentialBuilder;
+use backon::Retryable;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use std::time::Duration;
 
 use crate::Error;
 
@@ -43,10 +46,12 @@ pub struct Post {
 pub trait DataSource: Into<Vec<Post>> + DeserializeOwned {
     #[tracing::instrument(skip(client), level = "trace")]
     async fn request_and_parse(client: &Client, url: &str) -> Result<Vec<Post>, Error> {
-        let response = client.get(url).send().await.map_err(|e| {
-            tracing::error!("Failed to make a request. Error: {}. URL: {}", e, url);
-            e
-        })?;
+        let response = (|| async { client.get(url).send().await })
+            .retry(ExponentialBuilder::default())
+            .notify(|err: &reqwest::Error, dur: Duration| {
+                tracing::warn!("retrying {:?} after {:?}", err, dur);
+            })
+            .await?;
         let parsed = response
             .json::<Self>()
             .await
