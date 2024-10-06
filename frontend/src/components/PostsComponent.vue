@@ -17,7 +17,7 @@
             ref="likeButtonRef"
             @click.prevent="like"
             class="btn btn-primary"
-            v-if="post.post.post_link.includes('twitter.com')">
+            v-if="post.post.post_link.includes('x.com')">
         🤍
         </button>
     </div>
