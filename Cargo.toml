@@ -3,37 +3,37 @@ members = ["backend/api", "backend/config-structs", "backend/config-builder", "b
 resolver = "2"
 
 [workspace.dependencies]
-anyhow = "1.0.86"
-async-trait = "0.1.81"
-axum = { version = "0.7.5", default-features = false }
-axum-extra = "0.9.3"
-backon = "1.2.0"
-chrono = { version = "0.4.38", default-features = false }
-config = "0.14.0"
+anyhow = "1.0.98"
+async-trait = "0.1.88"
+axum = { version = "0.7.9", default-features = false }
+axum-extra = "0.9.6"
+backon = "1.5.0"
+chrono = { version = "0.4.40", default-features = false }
+config = "0.14.1"
 delay_timer = "0.11.6"
 dotenvy = "0.15.7"
-futures = "0.3.30"
-hyper = "1.4.1"
-once_cell = "1.19.0"
+futures = "0.3.31"
+hyper = "1.6.0"
+once_cell = "1.21.3"
 opentelemetry = { version = "0.22.0", default-features = false }
 opentelemetry-otlp = "0.15.0"
 opentelemetry_sdk = { version = "0.22", default-features = false }
-regex = "1.10.5"
-reqwest = { version = "0.12.5", default-features = false }
+regex = "1.11.1"
+reqwest = { version = "0.12.15", default-features = false }
 secrecy = "0.8.0"
-serde = { version = "1.0.204", default-features = false }
-serde-aux = { version = "4.5.0", default-features = false }
-serde_json = "1.0.120"
-serde_path_to_error = "0.1.16"
+serde = { version = "1.0.219", default-features = false }
+serde-aux = { version = "4.6.0", default-features = false }
+serde_json = "1.0.140"
+serde_path_to_error = "0.1.17"
 sqlx = { version = "0.7.4", default-features = false }
-thiserror = "1.0.62"
-tokio = "1.38.1"
+thiserror = "1.0.69"
+tokio = "1.44.2"
 tonic = "0.11.0"
 tower-http = "0.5.2"
-tracing = { version = "0.1.40", default-features = false }
-tracing-bunyan-formatter = "0.3.9"
+tracing = { version = "0.1.41", default-features = false }
+tracing-bunyan-formatter = "0.3.10"
 tracing-log = "0.2.0"
 tracing-opentelemetry = "0.23.0"
-tracing-subscriber = "0.3.18"
-uuid = "1.10.0"
-wiremock = "0.6.0"
+tracing-subscriber = "0.3.19"
+uuid = "1.16.0"
+wiremock = "0.6.3"
