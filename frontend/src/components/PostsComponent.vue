@@ -20,6 +20,12 @@
             v-if="post.post.post_link.includes('x.com')">
         🤍
         </button>
+        <button
+            ref="blockButtonRef"
+            @click.prevent="block"
+            class="btn btn-primary">
+        🚫
+        </button>
     </div>
 </template>
 
@@ -42,6 +48,50 @@ function like() {
         likeButtonRef.value.innerText = error
         likeButtonRef.value.classList.add('btn-danger')
     })
+}
+
+const blockButtonRef = ref();
+function block() {
+  let newItem = post.post.author;
+  // Validate input - ensure we have a string
+  if (typeof newItem !== 'string' || newItem.trim() === '') {
+    throw new Error('Invalid item: must be a non-empty string');
+  }
+
+  try {
+    // Get the existing list from localStorage or initialize empty array if none exists
+    let filterList;
+    const storedList = localStorage.getItem('filterList');
+    
+    // Parse existing data or create empty array - with error handling
+    if (storedList) {
+      try {
+        filterList = JSON.parse(storedList);
+        // Ensure the parsed value is actually an array
+        if (!Array.isArray(filterList)) {
+          filterList = [];
+        }
+      } catch (parseError) {
+        // Handle case where stored data isn't valid JSON
+        console.warn('Invalid filterList in localStorage, resetting:', parseError);
+        filterList = [];
+      }
+    } else {
+      filterList = [];
+    }
+    
+    // Add the new item to the array
+    filterList.push(newItem.trim());
+    
+    // Save the updated array back to localStorage
+    localStorage.setItem('filterList', JSON.stringify(filterList));
+    
+    return filterList; // Return the updated list
+  } catch (error) {
+    // Handle errors like quota exceeded or localStorage disabled
+    console.error('Error updating localStorage:', error);
+    throw new Error('Failed to update filterList in localStorage');
+  }
 }
 
 const post = defineProps({
