@@ -26,9 +26,5 @@ etl = { path = "../etl" }
 api = { path = "../api" }
 
 [[test]]
-name = "embed"
-path = "embed.rs"
-
-[[test]]
 name = "update"
 path = "update.rs"

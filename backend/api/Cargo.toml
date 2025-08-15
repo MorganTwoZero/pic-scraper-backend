@@ -26,7 +26,6 @@ tracing = { workspace = true, features = ["log"] }
 # local deps
 config-builder = { path = "../config-builder" }
 config-structs = { path = "../config-structs" }
-embed = { path = "../embed" }
 errors = { path = "../errors" }
 etl = { path = "../etl" }
 tele = { path = "../tele" }

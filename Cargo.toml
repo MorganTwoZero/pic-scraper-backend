@@ -1,11 +1,11 @@
 [workspace]
-members = ["backend/api", "backend/config-structs", "backend/config-builder", "backend/embed", "backend/errors", "backend/etl", "backend/tests", "backend/tele"]
+members = ["backend/api", "backend/config-structs", "backend/config-builder", "backend/errors", "backend/etl", "backend/tests", "backend/tele"]
 resolver = "2"
 
 [workspace.dependencies]
 anyhow = "1.0.98"
 async-trait = "0.1.88"
-axum = { version = "0.7.9", default-features = false }
+axum = { version = "0.7.9", features = [ "query" ], default-features = false }
 axum-extra = "0.9.6"
 backon = "1.5.0"
 chrono = { version = "0.4.40", default-features = false }

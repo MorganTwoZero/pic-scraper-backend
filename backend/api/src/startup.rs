@@ -14,7 +14,6 @@ use crate::{
     Error,
 };
 use config_structs::{ApiState, DatabaseSettings, Settings};
-use embed::{embed, proxy_image_route};
 
 #[derive(Clone)]
 pub struct StateWrapper(Arc<ApiState>);
@@ -86,9 +85,6 @@ impl Application {
             .route("/api/update/last_update", get(last_update))
             .route("/api/honkai", get(load_honkai_posts))
             .route("/api/myfeed", get(load_twitter_home_posts))
-            .route("/api/jpg", get(proxy_image_route))
-            .route("/en/artworks/:path", get(embed))
-            .route("/en/artworks/:path/:pic_num", get(embed))
             .nest_service("/", serve_dir.clone())
             .fallback_service(serve_dir)
             .layer(tele::opentelemetry_tracing_layer())
