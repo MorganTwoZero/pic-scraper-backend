@@ -73,7 +73,6 @@ pub async fn spawn_api() -> TestApi {
         twitter_home: format!("{}/twitter_home", mock_server.uri()),
         twitter_honkai: format!("{}/twitter_honkai", mock_server.uri()),
         mihoyo: format!("{}/mihoyo", mock_server.uri()),
-        lofter: format!("{}/lofter", mock_server.uri()),
     };
 
     let config = {

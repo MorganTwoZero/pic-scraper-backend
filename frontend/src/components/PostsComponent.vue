@@ -105,18 +105,6 @@ function PixivLink(post) {
     post.post.preview_link = post.post.post_link.replace('net', 'sbs') + '.jpg'
 }
 
-function LofterLink(post) {
-    post.post.clipboard_link = post.post.preview_link
-
-    post.post.preview_link = `${import.meta.env.VITE_APP_BACKEND_URL}/jpg?url=` + post.post.preview_link
-
-    post.post.author_profile_image = `${import.meta.env.VITE_APP_BACKEND_URL}/jpg?url=` + post.post.author_profile_image
-}
-
-function LofterAuthorLink(post) {
-    post.post.author_link = `https://www.lofter.com/front/blog/home-page/${post.post.author_link.match(/https:\/\/(.+?)\.lofter\.com/)[1]}`;
-}
-
 const created = computed(() => {
     return new Date(post.post.created).toLocaleTimeString('ru');
 });
@@ -128,8 +116,6 @@ function toClipboard(e) {
             text = post.post.post_link.replace('twitter', 'fxtwitter');
         } else if (post.post.post_link.startsWith('https://www.pixiv.net')) {
             text = post.post.post_link.replace('pixiv', 'phixiv');
-        } else if (post.post.post_link.search("lofter") != -1) {
-            text = `${post.post.post_link} [.](${post.post.clipboard_link.replace(/\?.*/, '')})`;
         } else {
             /* Delete everything after '?.' */
             text = `<${post.post.post_link}> [.](${post.post.preview_link.replace(/\?.*/, '')})`;
@@ -140,11 +126,6 @@ function toClipboard(e) {
 onBeforeMount(() => {
     if (post.post.post_link.startsWith('https://www.pixiv.net')) {
         PixivLink(post)
-    }
-
-    if (post.post.post_link.search("lofter") != -1) {
-        LofterLink(post);
-        LofterAuthorLink(post);
     }
 })
 </script>

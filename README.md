@@ -5,7 +5,6 @@
 ## TODO:
  - [ ] handle "home-coversation" in twitter home response
  - [ ] increase twitter home "count" variable in request
- - [ ] lofter tags in config
  - [ ] telemetry
  - [ ] cache for the pic proxy
  - [ ] search

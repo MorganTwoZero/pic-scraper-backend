@@ -4,8 +4,7 @@ use reqwest::Client;
 use crate::{
     save::{save_honkai_posts, save_update_time},
     transform::{
-        DataSource, LofterResponse, MihoyoResponse, MultiUrlDataSource, PixivResponse, Post,
-        TwitterHomeResponse, TwitterHonkaiResponse,
+        DataSource, MihoyoResponse, PixivResponse, Post, TwitterHomeResponse, TwitterHonkaiResponse,
     },
     Result,
 };
@@ -22,7 +21,6 @@ pub async fn create_vec_posts(
         TwitterHonkaiResponse::request_and_parse(client, &urls.twitter_honkai),
         MihoyoResponse::request_and_parse(client, &urls.mihoyo),
         TwitterHomeResponse::request_and_parse(client, &urls.twitter_home),
-        LofterResponse::request_and_parse_multi(client, LofterResponse::tags(&urls.lofter)),
     ])
     .await;
     responses

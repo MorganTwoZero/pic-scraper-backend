@@ -1,7 +1,7 @@
 use std::fs;
 
 use wiremock::matchers::path;
-use wiremock::{Mock, Request, ResponseTemplate};
+use wiremock::{Mock, ResponseTemplate};
 
 use etl::{fill_db, Post};
 
@@ -18,8 +18,6 @@ async fn test_update_fills_db() {
         fs::read_to_string("assets/json/twitter-home.json").expect("Unable to read the file");
     let twitter_honkai_json =
         fs::read_to_string("assets/json/twitter-honkai.json").expect("Unable to read the file");
-    let lofter_json =
-        fs::read_to_string("assets/json/lofter.json").expect("Unable to read the file");
     let _pixiv_mock = Mock::given(path("/pixiv"))
         .respond_with(ResponseTemplate::new(200).set_body_raw(pixiv_json, "application/json"))
         .expect(1)
@@ -46,12 +44,6 @@ async fn test_update_fills_db() {
         )
         .expect(1)
         .named("twitter_honkai")
-        .mount(&app.mock_server)
-        .await;
-    let _lofter_mock = Mock::given(|req: &Request| req.url.as_str().contains("lofter"))
-        .respond_with(ResponseTemplate::new(200).set_body_raw(lofter_json, "application/json"))
-        .expect(7)
-        .named("lofter")
         .mount(&app.mock_server)
         .await;
 

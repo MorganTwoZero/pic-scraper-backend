@@ -1,10 +1,8 @@
-mod lofter;
 mod mihoyo_bbs;
 mod pixiv;
 mod twitter_home;
 mod twitter_honkai;
 
-pub use lofter::LofterResponse;
 pub use mihoyo_bbs::MihoyoResponse;
 pub use pixiv::PixivResponse;
 use reqwest::Client;
@@ -25,7 +23,6 @@ pub enum PostSource {
     Twitter,
     Mihoyo,
     Pixiv,
-    Lofter,
     TwitterHome,
 }
 
@@ -62,14 +59,4 @@ pub trait DataSource: Into<Vec<Post>> + DeserializeOwned {
             .into();
         Ok(parsed)
     }
-}
-
-#[async_trait]
-pub trait MultiUrlDataSource: DataSource {
-    fn tags(url: &str) -> Vec<String>;
-
-    async fn request_and_parse_multi(
-        client: &Client,
-        urls: Vec<String>,
-    ) -> Result<Vec<Post>, Error>;
 }

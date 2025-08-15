@@ -13,7 +13,6 @@ pub struct SourcesUrls {
     pub twitter_honkai: String,
     pub twitter_home: String,
     pub mihoyo: String,
-    pub lofter: String,
 }
 
 #[derive(serde::Deserialize, Clone)]
