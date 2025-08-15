@@ -23,9 +23,9 @@ services:
       - APP_app__headers__authorization=${APP_app__headers__authorization}
       - APP_app__headers__csrf_token=${APP_app__headers__csrf_token}
 
-      - VIRTUAL_HOST=pixiv.sbs,www.pixiv.sbs
+      - VIRTUAL_HOST=morgan20.ru,www.morgan20.ru
       - VIRTUAL_PORT=8000
-      - LETSENCRYPT_HOST=pixiv.sbs,www.pixiv.sbs
+      - LETSENCRYPT_HOST=morgan20.ru,www.morgan20.ru
 
       - RUST_LOG=${RUST_LOG}
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}

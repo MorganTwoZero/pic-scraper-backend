@@ -46,7 +46,7 @@ async fn test_embed_user_agent_check_from_discord() {
         .unwrap();
     assert_eq!(
         response,
-        r#"<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://pixiv.sbs/en/artworks/123.jpg">"#
+        r#"<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://morgan20.ru/en/artworks/123.jpg">"#
     );
 }
 

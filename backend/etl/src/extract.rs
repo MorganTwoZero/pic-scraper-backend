@@ -67,7 +67,7 @@ mod tests {
             created: "123".to_string(),
             images_number: 1,
             post_link: "https://www.pixiv.net/en/artworks/106611397".to_string(),
-            preview_link: "https://www.pixiv.sbs/en/artworks/106611397.jpg".to_string(),
+            preview_link: "https://www.morgan20.ru/en/artworks/106611397.jpg".to_string(),
             source: PostSource::Pixiv,
             tags: Some(vec!["Koikatsu".to_string()]),
         };

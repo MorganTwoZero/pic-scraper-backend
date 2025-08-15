@@ -83,7 +83,7 @@ async fn html(user_agent: UserAgent, pixiv_id: PixivId) -> Response {
 
     if DISCORD_HEADERS.contains(&user_agent.as_str()) {
         let html = format!(
-            r#"<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://pixiv.sbs/en/artworks/{}.jpg">"#,
+            r#"<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://morgan20.ru/en/artworks/{}.jpg">"#,
             pixiv_id.full()
         );
         let mut response = html.into_response();
