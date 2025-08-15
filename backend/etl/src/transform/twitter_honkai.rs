@@ -72,7 +72,6 @@ pub struct ItemContent {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TweetResults {
-    #[serde(rename = "result")]
     pub result: TweetResult,
 }
 
@@ -111,15 +110,19 @@ pub struct UserResults {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct UserResult {
-    pub legacy: UserDetails,
+    pub core: UserDetails,
+    pub avatar: Avatar,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Avatar {
+    pub image_url: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UserDetails {
     pub name: String,
-    #[serde(rename = "profile_image_url_https")]
-    pub profile_image_url_https: String,
     #[serde(rename = "screen_name")]
     pub screen_name: String,
 }
@@ -151,7 +154,7 @@ impl TryFrom<Tweet> for Post {
     type Error = Error;
 
     fn try_from(value: Tweet) -> Result<Self, Self::Error> {
-        let user = value.core.user_results.result.legacy;
+        let user = value.core.user_results.result;
         let value = value.legacy;
         let created = DateTime::parse_from_str(&value.created_at, "%a %b %d %H:%M:%S %z %Y")
             .ok()
@@ -167,13 +170,13 @@ impl TryFrom<Tweet> for Post {
         Ok(Self {
             preview_link: main_pic.media_url_https.to_string(),
             post_link: main_pic.expanded_url.replace("/photo/1", ""),
-            author_link: format!("https://twitter.com/{}", user.screen_name),
-            author: format!("{}@{}", user.name, user.screen_name),
+            author_link: format!("https://twitter.com/{}", user.core.screen_name),
+            author: format!("{}@{}", user.core.name, user.core.screen_name),
             created,
             source: PostSource::Twitter,
             images_number: media.len() as i32,
             tags: None,
-            author_profile_image: Some(user.profile_image_url_https),
+            author_profile_image: Some(user.avatar.image_url),
         })
     }
 }
