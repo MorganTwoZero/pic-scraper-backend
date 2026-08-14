@@ -10,7 +10,7 @@ path = "lib.rs"
 [dependencies]
 once_cell = { workspace = true }
 reqwest = { workspace = true, features = ["json"] }
-sqlx = { workspace = true, features = ["runtime-tokio-rustls", "macros", "postgres", "migrate"] }
+sqlx = { workspace = true, features = ["runtime-tokio", "macros", "postgres", "migrate"] }
 tokio = { workspace = true, features = ["macros", "rt"] }
 tracing = { workspace = true, features = ["log"] }
 tracing-bunyan-formatter = { workspace = true }

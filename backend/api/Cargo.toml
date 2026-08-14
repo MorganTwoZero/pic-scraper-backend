@@ -29,7 +29,7 @@ config-structs = { path = "../config-structs" }
 errors = { path = "../errors" }
 etl = { path = "../etl" }
 tele = { path = "../tele" }
-sqlx = { workspace = true, features = ["runtime-tokio-rustls", "macros", "postgres", "migrate"] }
+sqlx = { workspace = true, features = ["runtime-tokio", "macros", "postgres", "migrate"] }
 
 [dev-dependencies]
 once_cell = { workspace = true }

@@ -19,7 +19,7 @@ reqwest = { workspace = true, features = ["json"] }
 secrecy = { workspace = true, features = ["serde"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
-sqlx = { workspace = true, features = ["postgres", "macros", "runtime-tokio-rustls", "chrono"] }
+sqlx = { workspace = true, features = ["postgres", "macros", "runtime-tokio", "chrono"] }
 tokio = { workspace = true, features = ["macros", "rt"] }
 tracing = { workspace = true, features = ["log"] }
 

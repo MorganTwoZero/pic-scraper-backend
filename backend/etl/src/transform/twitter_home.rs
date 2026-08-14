@@ -86,7 +86,7 @@ pub struct Limited {
 #[derive(Deserialize)]
 pub struct Tweet {
     pub core: Core,
-    pub legacy: Legacy2,
+    pub legacy: Legacy,
 }
 
 #[derive(Deserialize)]
@@ -101,20 +101,26 @@ pub struct UserResults {
 
 #[derive(Deserialize)]
 pub struct Result2 {
-    pub legacy: Legacy,
+    pub core: Core2,
+    pub avatar: Avatar,
 }
 
 #[derive(Deserialize)]
-pub struct Legacy {
+pub struct Avatar {
+    pub image_url: String,
+}
+
+#[derive(Deserialize)]
+pub struct Core2 {
     pub name: String,
-    pub profile_image_url_https: String,
     pub screen_name: String,
 }
 
 #[derive(Deserialize)]
-pub struct Legacy2 {
+pub struct Legacy {
     pub created_at: String,
     pub entities: Entities,
+    pub full_text: String,
 }
 
 #[derive(Deserialize)]
@@ -132,7 +138,7 @@ impl TryFrom<Tweet> for Post {
     type Error = Error;
 
     fn try_from(value: Tweet) -> Result<Self, Self::Error> {
-        let user = value.core.user_results.result.legacy;
+        let user = value.core.user_results.result;
         let value = value.legacy;
         let created = DateTime::parse_from_str(&value.created_at, "%a %b %d %H:%M:%S %z %Y")
             .ok()
@@ -148,13 +154,13 @@ impl TryFrom<Tweet> for Post {
         Ok(Self {
             preview_link: main_pic.media_url_https.to_string(),
             post_link: main_pic.expanded_url.replace("/photo/1", ""),
-            author_link: format!("https://twitter.com/{}", user.screen_name),
-            author: format!("{}@{}", user.name, user.screen_name),
+            author_link: format!("https://twitter.com/{}", user.core.screen_name),
+            author: format!("{}@{}", user.core.name, user.core.screen_name),
             created,
             source: PostSource::TwitterHome,
             images_number: media.len() as i32,
             tags: None,
-            author_profile_image: Some(user.profile_image_url_https),
+            author_profile_image: Some(user.avatar.image_url),
         })
     }
 }
@@ -192,7 +198,7 @@ fn process_tweet(tweet: SingleTweet) -> Option<Post> {
         TweetResult::Normal(normal) => normal,
         TweetResult::Limited(limited) => limited.tweet,
     };
-    if tweet.legacy.entities.media.is_some() {
+    if tweet.legacy.entities.media.is_some() && !tweet.legacy.full_text.starts_with("RT @") {
         Post::try_from(tweet).ok()
     } else {
         None
