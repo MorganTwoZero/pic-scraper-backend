@@ -32,7 +32,7 @@ impl Application {
                 "cookie",
                 config.app.headers.cookie.expose_secret().to_owned(),
             ),
-            ("x-user-id", "37028420".to_owned()),
+            ("x-client-transaction-id", "TGWmdm4mRFoAlR7wggjlCH/SyJyWXcGN6XY71r1WlDx4F6vJItywatlNDCbdbzv1VvM1fEp2ekMjcAwAiK2WgU655apNTw".to_owned()),
             (
                 "authorization",
                 config.app.headers.authorization.expose_secret().to_owned(),
