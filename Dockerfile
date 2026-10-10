@@ -1,43 +1,41 @@
-FROM node:lts-alpine AS frontend_builder
+FROM node:lts-alpine AS frontend
 WORKDIR /app
-COPY ./frontend/vite.config.js .
-COPY ./frontend/package*.json .
-RUN npm install
 
-FROM frontend_builder AS frontend
-COPY ./frontend .
-ARG VITE_APP_BACKEND_URL
+COPY frontend/package*.json ./
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci
+
+COPY frontend .
+ARG VITE_APP_BACKEND_URL=https://morgan20.ru/api
 RUN npm run build
 
-FROM clux/muslrust:stable AS planner
-RUN cargo install cargo-chef
-COPY ./Cargo.lock .
-COPY ./Cargo.toml .
-COPY ./backend ./backend
+FROM clux/muslrust:stable AS chef
+RUN --mount=type=cache,target=/root/.cargo/registry \
+    --mount=type=cache,target=/root/.cargo/git \
+    cargo install cargo-chef --locked
+
+FROM chef AS planner
+COPY Cargo.toml Cargo.lock ./
+COPY backend ./backend
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM clux/muslrust:stable AS cacher
-RUN cargo install cargo-chef
-COPY --from=planner /volume/recipe.json recipe.json
-RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
-RUN echo ${PWD} && ls -lR
-
-FROM clux/muslrust:stable AS builder
-COPY ./backend/migrations ./backend/migrations
-COPY ./.sqlx ./.sqlx
-COPY ./Cargo.lock .
-COPY ./Cargo.toml .
-COPY ./backend ./backend
+FROM chef AS builder
 ENV SQLX_OFFLINE=true
-RUN echo ${PWD} && ls -lR
-COPY --from=cacher /volume/target target
-# COPY --from=cacher /root/.cargo /root/.cargo
-RUN cargo build --release --bin api --target x86_64-unknown-linux-musl
-RUN cargo build --release --bin scraper --target x86_64-unknown-linux-musl
 
-# Need cacerts
+COPY --from=planner /volume/recipe.json recipe.json
+RUN --mount=type=cache,target=/root/.cargo/registry \
+    --mount=type=cache,target=/root/.cargo/git \
+    cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
+
+COPY Cargo.toml Cargo.lock ./
+COPY .sqlx ./.sqlx
+COPY backend ./backend
+RUN --mount=type=cache,target=/root/.cargo/registry \
+    --mount=type=cache,target=/root/.cargo/git \
+    cargo build --release --target x86_64-unknown-linux-musl --bin api --bin scraper
+
 FROM gcr.io/distroless/static:nonroot AS final
 COPY --from=builder --chown=nonroot:nonroot /volume/target/x86_64-unknown-linux-musl/release/api /api
 COPY --from=builder --chown=nonroot:nonroot /volume/target/x86_64-unknown-linux-musl/release/scraper /scraper
-COPY ./backend/migrations ./backend/migrations
+COPY backend/migrations ./backend/migrations
 COPY --from=frontend /app/dist ./frontend/dist
