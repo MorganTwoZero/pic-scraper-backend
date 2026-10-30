@@ -16,6 +16,12 @@ const routes = [
     meta: {title: 'My feed'},
   },
   {
+    path: '/arknights',
+    name: 'arknights',
+    component: PostsView,
+    meta: {title: 'Arknights'},
+  },
+  {
     path: '/:catchAll(.*)', redirect: '/honkai' 
   }
 ]

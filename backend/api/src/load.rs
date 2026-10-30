@@ -72,6 +72,34 @@ pub async fn load_twitter_home_posts(
 }
 
 #[tracing::instrument(skip_all)]
+pub async fn load_arknights_posts(
+    State(ApiState { db_pool, .. }): State<ApiState>,
+    page: Query<Page>,
+) -> Result<Json<Vec<Post>>> {
+    Ok(Json(
+        sqlx::query_as!(
+            Post,
+            r#"SELECT
+            post_link,
+            preview_link,
+            images_number,
+            created,
+            author,
+            author_link,
+            source AS "source!: PostSource",
+            tags,
+            author_profile_image
+        FROM arknights_posts
+        ORDER BY id DESC
+        LIMIT 20 OFFSET $1"#,
+            page.page * 20
+        )
+        .fetch_all(&db_pool)
+        .await?,
+    ))
+}
+
+#[tracing::instrument(skip_all)]
 pub async fn load_last_update_time(db_pool: &PgPool) -> Result<chrono::DateTime<chrono::Utc>> {
     Ok(
         sqlx::query!("SELECT last_update_time FROM last_update_time WHERE id = 0;")

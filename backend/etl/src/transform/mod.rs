@@ -24,6 +24,7 @@ pub enum PostSource {
     Mihoyo,
     Pixiv,
     TwitterHome,
+    Skland,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

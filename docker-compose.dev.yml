@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   db:
     restart: unless-stopped
@@ -14,6 +12,14 @@ services:
     ports:
       - "5432:5432"
     command: ["postgres", "-c", "log_statement=all"]
+
+  skland-scraper:
+    build: ../skland-scraper
+    environment:
+      PGPASSWORD: password
+    depends_on: 
+      db:
+        condition: service_healthy
 
   web:
     environment:

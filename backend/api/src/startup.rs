@@ -9,7 +9,7 @@ use tokio::net::TcpListener;
 use tower_http::services::{ServeDir, ServeFile};
 
 use crate::{
-    load::{load_honkai_posts, load_twitter_home_posts},
+    load::{load_arknights_posts, load_honkai_posts, load_twitter_home_posts},
     site_routes::{last_update, like},
     Error,
 };
@@ -85,6 +85,7 @@ impl Application {
             .route("/api/update/last_update", get(last_update))
             .route("/api/honkai", get(load_honkai_posts))
             .route("/api/myfeed", get(load_twitter_home_posts))
+            .route("/api/arknights", get(load_arknights_posts))
             .nest_service("/", serve_dir.clone())
             .fallback_service(serve_dir)
             .layer(tele::opentelemetry_tracing_layer())

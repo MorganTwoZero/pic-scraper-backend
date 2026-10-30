@@ -14,6 +14,14 @@ services:
       timeout: 10s
       retries: 10
 
+  skland-scraper:
+    image: morgan20/skland-scraper
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    depends_on: 
+      db:
+        condition: service_healthy
+
   web:
     environment:
       - APP_ENVIRONMENT=prod
